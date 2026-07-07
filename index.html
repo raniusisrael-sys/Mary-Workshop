@@ -4,10 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mary Two Wheelar Workshop</title>
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- React & Babel -->
     <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <!-- html2canvas -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 </head>
 <body class="bg-gray-100 font-sans text-gray-900">
@@ -16,10 +19,11 @@
     <script type="text/babel">
         const { useState, useEffect } = React;
 
-        const GOOGLE_SHEETS_URL = "https://script.google.com/macros/s/AKfycbyOzAZoSlxeTHk0A2uEM8Ehsc8aKSgDeSd3eNvi1r7ylDkYHLVH144PdeHH1hkw0i0/exec";
+        const GOOGLE_SHEETS_URL = "https://script.google.com/macros/s/AKfycbyGocBf8QYE8p2CDT5oqthfONqE7LKh3eVdVHhu6Z2q5BhuuLexY1oOIJfmjecOA1m0/exec";
 
         function App() {
-            const upiID = "raniusisrael@okicici"; // <-- ADD UPI ID HERE
+            // === SHOP SETTINGS ===
+            const upiID = "YOUR_UPI_ID@bank"; // <-- ADD UPI ID HERE
             const shopName = "Mary Two Wheelar Workshop";
             const verses = [
                 '"The Lord is my shepherd; I shall not want." - Psalm 23:1',
@@ -107,7 +111,7 @@
 
             const sparesTotal = items.reduce((sum, item) => sum + item.price, 0);
             const grandTotal = sparesTotal + (parseFloat(cooli) || 0);
-            const currentAdvance = parseFloat(advancePaid) || 0;
+            const currentAdvance = parseFloat(advancePaid) || 0; // BUG WAS HERE (Name change)
             const balanceDue = Math.max(0, grandTotal - currentAdvance);
             const paymentStatus = balanceDue > 0 ? 'Pending' : 'Paid';
 
@@ -118,17 +122,16 @@
                 
                 setIsSubmitting(true);
                 
-                // Readable string for Google Sheets viewing
                 const itemsString = items.map(i => `${i.name} (₹${i.price})`).join(', ');
                 
                 const billData = {
                     action: editingBillId ? "update" : "create",
                     billId: editingBillId,
                     customerName, phone, vehicleModel, vehicleNo, 
-                    itemsString: itemsString, // Saved to Column F
-                    itemsArray: items,        // Saved to Hidden Column O as JSON
+                    itemsString: itemsString, 
+                    itemsArray: items,        
                     sparesTotal, cooli: parseFloat(cooli) || 0,
-                    grandTotal, paymentMethod: "Advance", amountPaid: currentAdvance,
+                    grandTotal, paymentMethod: "Advance", amountPaid: currentAdvance, // BUG FIXED HERE
                     balanceDue, status: paymentStatus
                 };
 
@@ -300,7 +303,6 @@
                 );
             }
 
-            // === BRAND NEW PENDING SCREEN ===
             if (currentScreen === 'pending') {
                 return (
                     <div className="min-h-screen bg-gray-100 p-4 max-w-md mx-auto pb-20 relative">
@@ -309,7 +311,6 @@
                             <h1 className="text-xl font-bold text-gray-800">Pending Payments</h1>
                         </div>
 
-                        {/* Total Pending Dashboard */}
                         <div className="bg-gradient-to-r from-red-500 to-red-700 p-6 rounded-3xl shadow-lg text-white mb-6 text-center">
                             <p className="text-sm font-medium opacity-90 mb-1">Total Outstanding Due</p>
                             <h2 className="text-4xl font-black">₹{totalPendingAmount.toFixed(2)}</h2>
@@ -344,7 +345,6 @@
                             </div>
                         )}
 
-                        {/* PAYMENT MODAL (Pops up when Collect Payment is clicked) */}
                         {payModalBill && (
                             <div className="fixed inset-0 bg-black/60 z-50 flex items-center justify-center p-4">
                                 <div className="bg-white rounded-3xl p-6 w-full max-w-sm shadow-2xl relative">
@@ -363,7 +363,6 @@
                                         <input type="number" className="border-2 border-blue-500 p-4 rounded-xl w-full text-2xl font-black text-center outline-none" value={modalPayAmount} onChange={(e) => setModalPayAmount(e.target.value)} />
                                     </div>
 
-                                    {/* Show QR instantly if QR mode is selected */}
                                     {modalPayMethod === 'QR' && modalPayAmount > 0 && (
                                         <div className="bg-gray-50 p-4 rounded-xl flex flex-col items-center justify-center mb-6 border border-gray-200">
                                             <div className="w-32 h-32 bg-white flex items-center justify-center mb-2 rounded-lg overflow-hidden shadow-sm">
@@ -487,7 +486,7 @@
                             
                             <div className="bg-gray-800 p-5 text-white">
                                 <div className="flex justify-between text-lg font-bold mb-2"><span>Grand Total</span><span>₹{grandTotal.toFixed(2)}</span></div>
-                                <div className="flex justify-between text-sm text-gray-400 mb-2"><span>Advance / Paid</span><span className="text-green-400">₹{currentAmountPaid.toFixed(2)}</span></div>
+                                <div className="flex justify-between text-sm text-gray-400 mb-2"><span>Advance / Paid</span><span className="text-green-400">₹{currentAdvance.toFixed(2)}</span></div>
                                 {balanceDue > 0 && (
                                     <div className="flex justify-between text-xl font-black mt-3 pt-3 border-t border-gray-700 text-red-400">
                                         <span>Balance Due</span><span>₹{balanceDue.toFixed(2)}</span>
@@ -504,7 +503,7 @@
                 );
             }
 
-            // NEW BILL / EDIT BILL FORM (CLEANED UP FOR ADVANCE PAYMENTS)
+            // NEW BILL / EDIT BILL FORM
             return (
                 <div className="p-4 max-w-md mx-auto pb-20">
                     <div className="flex items-center gap-4 mb-6 mt-2">
