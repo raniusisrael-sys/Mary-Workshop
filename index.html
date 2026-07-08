@@ -89,24 +89,6 @@
         // Connected to your exact Google Script URL
         const GOOGLE_SHEETS_URL = "https://script.google.com/macros/s/AKfycbyOzAZoSlxeTHk0A2uEM8Ehsc8aKSgDeSd3eNvi1r7ylDkYHLVH144PdeHH1hkw0i0/exec"; 
 
-        // 🌟 AUDIO MANAGER (Loud Bike Sound Removed - Only Soft Clicks & Success Chimes) 🌟
-        const audioClick = new Audio('https://actions.google.com/sounds/v1/cartoon/pop.ogg');
-        const audioSuccess = new Audio('https://actions.google.com/sounds/v1/cartoon/magic_chime.ogg');
-
-        const playSound = (type) => {
-            try {
-                if (type === 'click') {
-                    audioClick.currentTime = 0;
-                    audioClick.volume = 0.3;
-                    audioClick.play().catch(e => console.log(e));
-                } else if (type === 'success') {
-                    audioSuccess.currentTime = 0;
-                    audioSuccess.volume = 1.0;
-                    audioSuccess.play().catch(e => console.log(e));
-                }
-            } catch(e) {}
-        };
-
         function App() {
             // === CONFIG ===
             const upiID = "weslyragland-1@okaxis"; 
@@ -170,7 +152,6 @@
                 fetchBills();
                 const handlePopState = (e) => {
                     if (e.state && e.state.screen) {
-                        playSound('click');
                         setCurrentScreen(e.state.screen);
                     }
                 };
@@ -180,13 +161,11 @@
             }, []);
 
             const navigateTo = (screenName) => {
-                playSound('click');
                 window.history.pushState({ screen: screenName }, '');
                 setCurrentScreen(screenName);
             };
 
             const toggleTheme = () => {
-                playSound('click');
                 setIsDarkMode(!isDarkMode);
             };
 
@@ -199,7 +178,6 @@
 
             // 🌟 SILENT SPLASH ENGINE 🌟
             const startEngineAndApp = () => {
-                playSound('click'); // Only plays the soft click
                 loadRandomVerse();
                 setCurrentScreen('splash');
                 
@@ -214,14 +192,12 @@
             const handleAddItem = (e) => {
                 e.preventDefault();
                 if (selectedItem && itemPrice) {
-                    playSound('click');
                     setItems([...items, { name: selectedItem, price: parseFloat(itemPrice) }]);
                     setSelectedItem(''); setItemPrice('');
                 }
             };
 
             const removeItem = (index) => {
-                playSound('click');
                 setItems(items.filter((_, i) => i !== index));
             };
 
@@ -238,7 +214,6 @@
                 if(!hasVehicleDetail) return alert("Please enter at least one detail!");
                 if(items.length === 0 && !cooli) return alert("Please add at least one spare part or labor charge!");
                 
-                playSound('click');
                 setIsSubmitting(true);
                 const itemsString = items.map(i => `${i.name} (₹${i.price})`).join(', ');
                 
@@ -254,7 +229,6 @@
                     const response = await fetch(GOOGLE_SHEETS_URL, { method: 'POST', body: JSON.stringify(billData) });
                     const result = await response.json();
                     if(result.result === "success") {
-                        playSound('success'); 
                         fetchBills(); 
                         loadRandomVerse(); 
                         navigateTo('receipt');
@@ -264,7 +238,6 @@
             };
 
             const resetForm = () => {
-                playSound('click');
                 setEditingBillId(null); setBillDate(new Date().toISOString());
                 setCustomerName(''); setPhone(''); setVehicleModel(''); setVehicleNo(''); 
                 setItems([]); setCooli(''); setAdvancePaid(''); 
@@ -272,7 +245,6 @@
             };
 
             const loadBillData = (bill) => {
-                playSound('click');
                 setEditingBillId(bill.billId); setBillDate(bill.date);
                 setCustomerName(bill.customerName); setPhone(bill.phone);
                 setVehicleModel(bill.vehicleModel); setVehicleNo(bill.vehicleNo);
@@ -281,20 +253,17 @@
             };
 
             const openPayModal = (bill) => {
-                playSound('click');
                 setPayModalBill(bill);
                 setModalPayAmount(bill.balanceDue);
                 setModalPayMethod('Cash');
             };
 
             const closePayModal = () => {
-                playSound('click');
                 setPayModalBill(null);
             };
 
             const handleConfirmPayment = async () => {
                 if(!modalPayAmount || modalPayAmount <= 0) return alert("Enter a valid amount!");
-                playSound('click');
                 setIsSubmitting(true);
 
                 const payVal = parseFloat(modalPayAmount);
@@ -317,7 +286,6 @@
                     const response = await fetch(GOOGLE_SHEETS_URL, { method: 'POST', body: JSON.stringify(billData) });
                     const result = await response.json();
                     if(result.result === "success") {
-                        playSound('success'); 
                         setPayModalBill(null); fetchBills();
                     } else alert("Error saving payment.");
                 } catch (error) { alert("Payment failed to save."); }
@@ -325,7 +293,6 @@
             };
 
             const handleShare = async () => {
-                playSound('click');
                 const receiptElement = document.getElementById('receipt-capture');
                 if (!receiptElement) return;
                 try {
@@ -396,7 +363,7 @@
                 const initial = bill.customerName ? bill.customerName.charAt(0).toUpperCase() : 'M';
                 return (
                     <div className={`${theme.card} p-4 mb-4 rounded-2xl flex flex-col gap-3 transition-transform cursor-pointer relative border-l-4 ${bill.balanceDue > 0 ? 'border-l-pink-500' : 'border-l-emerald-500'}`}>
-                        <div className="flex items-center gap-4" onClick={() => { playSound('click'); loadBillData(bill); loadRandomVerse(); navigateTo('receipt'); }}>
+                        <div className="flex items-center gap-4" onClick={() => { loadBillData(bill); loadRandomVerse(); navigateTo('receipt'); }}>
                             <div className={`w-14 h-14 rounded-full ${theme.primaryGradient} flex items-center justify-center text-white font-bold text-2xl shadow-lg shrink-0`}>
                                 {initial}
                             </div>
@@ -422,7 +389,7 @@
                             )}
                             
                             <button 
-                                onClick={(e) => { e.stopPropagation(); playSound('click'); loadBillData(bill); navigateTo('newBill'); }} 
+                                onClick={(e) => { e.stopPropagation(); loadBillData(bill); navigateTo('newBill'); }} 
                                 className={`flex items-center gap-1 text-indigo-500 ${isDarkMode ? 'bg-indigo-500/10 hover:bg-indigo-500/20' : 'bg-indigo-100 hover:bg-indigo-200'} px-4 py-1.5 rounded-xl text-sm font-bold border border-indigo-500/20 active:scale-95 transition-transform`}
                             >
                                 ✏️ Edit
@@ -436,6 +403,7 @@
             return (
                 <div className={`${theme.bg} min-h-screen transition-colors duration-300 font-sans`}>
                     
+                    {/* PRE-SPLASH */}
                     {currentScreen === 'pre-splash' && (
                         <div className="min-h-screen flex flex-col items-center justify-center relative overflow-hidden bg-[#0f172a]">
                             <div className="text-center z-10 p-6 flex flex-col items-center">
@@ -449,6 +417,7 @@
                         </div>
                     )}
 
+                    {/* 🌟 EPIC 6.5s CINEMATIC SPLASH SCREEN 🌟 */}
                     {currentScreen === 'splash' && (
                         <div className="min-h-screen flex flex-col items-center justify-center relative overflow-hidden bg-[#0f172a]">
                             <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/stardust.png')] opacity-30"></div>
@@ -558,7 +527,7 @@
                                                 </div>
                                             </div>
                                             <div className={`flex justify-between gap-3 mt-2 pt-3 border-t ${isDarkMode ? 'border-slate-700' : 'border-slate-200'}`}>
-                                                <button onClick={() => { playSound('click'); loadBillData(bill); navigateTo('newBill'); }} className={`w-1/3 text-indigo-500 font-bold text-sm py-3 rounded-xl border border-indigo-500/30 active:scale-95 transition-transform`}>
+                                                <button onClick={() => { loadBillData(bill); navigateTo('newBill'); }} className={`w-1/3 text-indigo-500 font-bold text-sm py-3 rounded-xl border border-indigo-500/30 active:scale-95 transition-transform`}>
                                                     ✏️ Edit
                                                 </button>
                                                 <button onClick={() => openPayModal(bill)} className={`flex-1 ${isDarkMode ? 'bg-slate-900 text-indigo-400' : 'bg-indigo-50 text-indigo-700'} font-bold text-lg py-3 rounded-xl border border-indigo-500/30 active:scale-95 transition-transform`}>
@@ -578,8 +547,8 @@
                                         <p className={`text-base ${theme.textMuted} mb-6 font-bold`}>{payModalBill.customerName} - {payModalBill.vehicleModel}</p>
                                         
                                         <div className={`flex gap-2 mb-6 p-2 ${theme.input} rounded-2xl`}>
-                                            <button onClick={() => {playSound('click'); setModalPayMethod('Cash')}} className={`w-1/2 py-3 text-lg rounded-xl font-bold transition-colors ${modalPayMethod === 'Cash' ? theme.primaryGradient + ' text-white shadow-md' : theme.textMuted}`}>Cash</button>
-                                            <button onClick={() => {playSound('click'); setModalPayMethod('QR')}} className={`w-1/2 py-3 text-lg rounded-xl font-bold transition-colors ${modalPayMethod === 'QR' ? theme.primaryGradient + ' text-white shadow-md' : theme.textMuted}`}>QR Scan</button>
+                                            <button onClick={() => {setModalPayMethod('Cash')}} className={`w-1/2 py-3 text-lg rounded-xl font-bold transition-colors ${modalPayMethod === 'Cash' ? theme.primaryGradient + ' text-white shadow-md' : theme.textMuted}`}>Cash</button>
+                                            <button onClick={() => {setModalPayMethod('QR')}} className={`w-1/2 py-3 text-lg rounded-xl font-bold transition-colors ${modalPayMethod === 'QR' ? theme.primaryGradient + ' text-white shadow-md' : theme.textMuted}`}>QR Scan</button>
                                         </div>
 
                                         <div className="mb-6">
@@ -743,7 +712,7 @@
 
                             <div className="mt-8 flex gap-3">
                                 <button onClick={() => navigateTo('dashboard')} className={`w-1/4 ${theme.card} ${theme.text} font-bold text-sm py-4 rounded-2xl active:scale-95 transition-transform shadow-lg`}>Home</button>
-                                <button onClick={() => { playSound('click'); navigateTo('newBill'); }} className={`w-1/4 ${isDarkMode ? 'bg-indigo-500/20 text-indigo-400 border border-indigo-500/30' : 'bg-indigo-100 text-indigo-600 border border-indigo-300'} font-bold text-sm py-4 rounded-2xl active:scale-95 transition-transform shadow-lg`}>✏️ Edit</button>
+                                <button onClick={() => { navigateTo('newBill'); }} className={`w-1/4 ${isDarkMode ? 'bg-indigo-500/20 text-indigo-400 border border-indigo-500/30' : 'bg-indigo-100 text-indigo-600 border border-indigo-300'} font-bold text-sm py-4 rounded-2xl active:scale-95 transition-transform shadow-lg`}>✏️ Edit</button>
                                 <button onClick={handleShare} className="flex-1 bg-gradient-to-r from-emerald-400 to-emerald-500 text-slate-900 font-black text-lg py-4 rounded-2xl glow-button active:scale-95 transition-transform shadow-xl">
                                     Share Bill
                                 </button>
