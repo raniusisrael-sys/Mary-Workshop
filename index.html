@@ -31,19 +31,52 @@
             80% { opacity: 1; transform: scale(1); }
             100% { opacity: 0; transform: scale(1.05); }
         }
-        @keyframes fadeInBike {
-            0% { opacity: 0; transform: scale(1.15); filter: blur(4px); }
+        @keyframes fadeInOut {
+            0% { opacity: 0; transform: scale(1.1); filter: blur(4px); }
             15% { opacity: 1; transform: scale(1); filter: blur(0px); }
             85% { opacity: 1; transform: scale(1); filter: blur(0px); }
             100% { opacity: 0; transform: scale(1.05); filter: blur(3px); }
         }
+        @keyframes driveBike {
+            0% { transform: translateX(-150vw) scale(0.8) rotate(-15deg); opacity: 0; }
+            20% { transform: translateX(-10vw) scale(1) rotate(0deg); opacity: 1; }
+            80% { transform: translateX(10vw) scale(1) rotate(0deg); opacity: 1; }
+            100% { transform: translateX(150vw) scale(0.8) rotate(15deg); opacity: 0; }
+        }
+        @keyframes roadMove {
+            0% { background-position: 0 0; }
+            100% { background-position: -200px 0; }
+        }
+        
         .phase-1 {
             animation: fadeOutVerse 3s cubic-bezier(0.25, 1, 0.5, 1) forwards;
         }
-        .phase-2 {
-            animation: fadeInBike 3.5s cubic-bezier(0.25, 1, 0.5, 1) forwards;
-            animation-delay: 2.8s; /* Waits for the verse to finish */
+        .phase-2-text {
+            animation: fadeInOut 3.5s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+            animation-delay: 2.8s;
             opacity: 0;
+        }
+        .phase-2-bike {
+            animation: driveBike 3.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+            animation-delay: 2.8s;
+            opacity: 0;
+            position: absolute;
+            bottom: 25%;
+            width: 340px;
+            z-index: 50;
+            filter: drop-shadow(0px 20px 10px rgba(34,211,238,0.4));
+        }
+        .phase-2-road {
+            animation: fadeInOut 3.5s cubic-bezier(0.25, 1, 0.5, 1) forwards, roadMove 0.4s linear infinite;
+            animation-delay: 2.8s, 0s;
+            opacity: 0;
+            background-image: linear-gradient(90deg, #64748b 50%, transparent 50%);
+            background-size: 40px 100%;
+            position: absolute;
+            bottom: 24%;
+            width: 100%;
+            height: 4px;
+            z-index: 40;
         }
     </style>
 </head>
@@ -56,16 +89,16 @@
         // Connected to your exact Google Script URL
         const GOOGLE_SHEETS_URL = "https://script.google.com/macros/s/AKfycbyOzAZoSlxeTHk0A2uEM8Ehsc8aKSgDeSd3eNvi1r7ylDkYHLVH144PdeHH1hkw0i0/exec"; 
 
-        // 🌟 GLOBAL AUDIO MANAGER 🌟
+        // 🌟 GLOBAL AUDIO MANAGER (USING UNBREAKABLE GOOGLE SOUNDS) 🌟
         const playSound = (type) => {
             try {
                 let url = '';
-                if(type === 'click') url = 'https://assets.mixkit.co/active_storage/sfx/2568/2568-preview.mp3'; 
-                if(type === 'success') url = 'https://assets.mixkit.co/active_storage/sfx/1435/1435-preview.mp3'; 
-                if(type === 'bike') url = 'https://assets.mixkit.co/active_storage/sfx/1632/1632-preview.mp3'; 
+                if(type === 'click') url = 'https://actions.google.com/sounds/v1/cartoon/pop.ogg'; 
+                if(type === 'success') url = 'https://actions.google.com/sounds/v1/cartoon/magic_chime.ogg'; 
+                if(type === 'bike') url = 'https://actions.google.com/sounds/v1/transportation/motorcycle_rev.ogg'; 
                 
                 const audio = new Audio(url);
-                audio.volume = type === 'click' ? 0.3 : 1.0; 
+                audio.volume = type === 'click' ? 0.4 : 1.0; 
                 audio.play().catch(e => console.log("Audio blocked by browser auto-play policy", e));
             } catch(e) {}
         };
@@ -220,9 +253,9 @@
                     const response = await fetch(GOOGLE_SHEETS_URL, { method: 'POST', body: JSON.stringify(billData) });
                     const result = await response.json();
                     if(result.result === "success") {
-                        playSound('success'); 
+                        playSound('success'); // TRUIMPHANT SUCCESS SOUND
                         fetchBills(); 
-                        loadRandomVerse(); 
+                        loadRandomVerse(); // Instantly loads a fresh verse for this customer!
                         navigateTo('receipt');
                     } else alert("Error saving to Google Sheets.");
                 } catch (error) { alert("Submission failed. Check internet connection."); }
@@ -283,7 +316,7 @@
                     const response = await fetch(GOOGLE_SHEETS_URL, { method: 'POST', body: JSON.stringify(billData) });
                     const result = await response.json();
                     if(result.result === "success") {
-                        playSound('success'); 
+                        playSound('success'); // TRUIMPHANT SUCCESS SOUND
                         setPayModalBill(null); fetchBills();
                     } else alert("Error saving payment.");
                 } catch (error) { alert("Payment failed to save."); }
@@ -354,7 +387,7 @@
                 const initial = bill.customerName ? bill.customerName.charAt(0).toUpperCase() : 'M';
                 return (
                     <div className={`${theme.card} p-4 mb-4 rounded-2xl flex flex-col gap-3 transition-transform cursor-pointer relative border-l-4 ${bill.balanceDue > 0 ? 'border-l-pink-500' : 'border-l-emerald-500'}`}>
-                        <div className="flex items-center gap-4" onClick={() => { loadBillData(bill); loadRandomVerse(); navigateTo('receipt'); }}>
+                        <div className="flex items-center gap-4" onClick={() => { playSound('click'); loadBillData(bill); loadRandomVerse(); navigateTo('receipt'); }}>
                             <div className={`w-14 h-14 rounded-full ${theme.primaryGradient} flex items-center justify-center text-white font-bold text-2xl shadow-lg shrink-0`}>
                                 {initial}
                             </div>
@@ -380,7 +413,7 @@
                             )}
                             
                             <button 
-                                onClick={(e) => { e.stopPropagation(); loadBillData(bill); navigateTo('newBill'); }} 
+                                onClick={(e) => { e.stopPropagation(); playSound('click'); loadBillData(bill); navigateTo('newBill'); }} 
                                 className={`flex items-center gap-1 text-indigo-500 ${isDarkMode ? 'bg-indigo-500/10 hover:bg-indigo-500/20' : 'bg-indigo-100 hover:bg-indigo-200'} px-4 py-1.5 rounded-xl text-sm font-bold border border-indigo-500/20 active:scale-95 transition-transform`}
                             >
                                 ✏️ Edit
@@ -424,20 +457,21 @@
                             </div>
 
                             {/* PHASE 2: HD SUPERBIKE & LOGO */}
-                            <div className="phase-2 absolute inset-0 flex flex-col items-center justify-center p-4 z-30 bg-[#0f172a]">
+                            <div className="phase-2-text absolute inset-0 flex flex-col items-center justify-center p-4 z-30 bg-[#0f172a]">
                                 <div className="absolute top-16 text-center w-full">
                                     <h1 className="text-5xl font-black tracking-widest uppercase font-serif bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 to-indigo-500 drop-shadow-[0_0_15px_rgba(99,102,241,0.5)] mb-2">Mary</h1>
                                     <div className="h-px w-24 mx-auto bg-cyan-500/50 my-4"></div>
                                     <h2 className="text-sm tracking-[0.3em] uppercase text-slate-300 font-bold">Two Wheelar Workshop</h2>
                                 </div>
-                                
-                                <img 
-                                    src="https://purepng.com/public/uploads/large/purepng.com-motorcyclemotorcyclemotorbikebike-17015284852932oeei.png" 
-                                    onError={(e) => { e.target.onerror = null; e.target.src="https://freepngimg.com/thumb/motorcycle/2-2-motorcycle-png-hd.png" }}
-                                    className="w-[140%] max-w-lg object-contain drop-shadow-[0_30px_30px_rgba(34,211,238,0.4)] mt-24" 
-                                    alt="Superbike" 
-                                />
                             </div>
+                                
+                            <img 
+                                src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/ca/Triumph_Daytona_675.png/1024px-Triumph_Daytona_675.png" 
+                                className="phase-2-bike" 
+                                alt="Superbike" 
+                            />
+                            
+                            <div className="phase-2-road"></div>
                         </div>
                     )}
 
@@ -519,7 +553,7 @@
                                                 </div>
                                             </div>
                                             <div className={`flex justify-between gap-3 mt-2 pt-3 border-t ${isDarkMode ? 'border-slate-700' : 'border-slate-200'}`}>
-                                                <button onClick={() => { loadBillData(bill); navigateTo('newBill'); }} className={`w-1/3 text-indigo-500 font-bold text-sm py-3 rounded-xl border border-indigo-500/30 active:scale-95 transition-transform`}>
+                                                <button onClick={() => { playSound('click'); loadBillData(bill); navigateTo('newBill'); }} className={`w-1/3 text-indigo-500 font-bold text-sm py-3 rounded-xl border border-indigo-500/30 active:scale-95 transition-transform`}>
                                                     ✏️ Edit
                                                 </button>
                                                 <button onClick={() => openPayModal(bill)} className={`flex-1 ${isDarkMode ? 'bg-slate-900 text-indigo-400' : 'bg-indigo-50 text-indigo-700'} font-bold text-lg py-3 rounded-xl border border-indigo-500/30 active:scale-95 transition-transform`}>
