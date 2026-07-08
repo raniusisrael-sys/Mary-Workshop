@@ -59,6 +59,23 @@
         // Your exact Google Apps Script URL
         const GOOGLE_SHEETS_URL = "https://script.google.com/macros/s/AKfycbyOzAZoSlxeTHk0A2uEM8Ehsc8aKSgDeSd3eNvi1r7ylDkYHLVH144PdeHH1hkw0i0/exec"; 
 
+        // 🌟 GLOBAL AUDIO MANAGER 🌟
+        const playSound = (type) => {
+            try {
+                let url = '';
+                // Soft UI Click
+                if(type === 'click') url = 'https://assets.mixkit.co/active_storage/sfx/2568/2568-preview.mp3'; 
+                // Triumphant Success Sound for Generating Bills
+                if(type === 'success') url = 'https://assets.mixkit.co/active_storage/sfx/1435/1435-preview.mp3'; 
+                // Fast Motorcycle Pass for Splash
+                if(type === 'bike') url = 'https://assets.mixkit.co/active_storage/sfx/1632/1632-preview.mp3'; 
+                
+                const audio = new Audio(url);
+                audio.volume = type === 'click' ? 0.3 : 1.0; 
+                audio.play().catch(e => console.log("Audio blocked by browser auto-play policy", e));
+            } catch(e) {}
+        };
+
         function App() {
             // === CONFIG ===
             const upiID = "weslyragland-1@okaxis"; // Your exact UPI ID
@@ -66,10 +83,9 @@
             
             // === STATE ===
             const [isDarkMode, setIsDarkMode] = useState(true); 
-            // App starts on a 'pre-splash' to allow the browser to play the audio
             const [currentScreen, setCurrentScreen] = useState('pre-splash');
             
-            // Random/Daily Verse State (Pulls from bible.js vault)
+            // Daily Verse State (Pulls from bible.js vault)
             const fallbackVerse = { tamil: '"கர்த்தர் என் மேய்ப்பராயிருக்கிறார்; நான் தாழ்ச்சியடையேன்."', text: '"The Lord is my shepherd; I shall not want."', ref: "Psalm 23:1" };
             const [currentVerse, setCurrentVerse] = useState(() => {
                 return typeof getCalculatedDailyVerseObject === 'function' ? getCalculatedDailyVerseObject() : fallbackVerse;
@@ -97,7 +113,7 @@
             const [modalPayAmount, setModalPayAmount] = useState('');
             const [modalPayMethod, setModalPayMethod] = useState('Cash');
 
-            // === THEME CLASSES (Dynamic Light/Dark Mode) ===
+            // === THEME CLASSES ===
             const theme = {
                 bg: isDarkMode ? 'bg-[#0f172a]' : 'bg-slate-100',
                 text: isDarkMode ? 'text-slate-100' : 'text-slate-900',
@@ -122,7 +138,10 @@
             useEffect(() => {
                 fetchBills();
                 const handlePopState = (e) => {
-                    if (e.state && e.state.screen) setCurrentScreen(e.state.screen);
+                    if (e.state && e.state.screen) {
+                        playSound('click');
+                        setCurrentScreen(e.state.screen);
+                    }
                 };
                 window.addEventListener('popstate', handlePopState);
                 window.history.replaceState({ screen: 'pre-splash' }, '');
@@ -130,8 +149,14 @@
             }, []);
 
             const navigateTo = (screenName) => {
+                playSound('click');
                 window.history.pushState({ screen: screenName }, '');
                 setCurrentScreen(screenName);
+            };
+
+            const toggleTheme = () => {
+                playSound('click');
+                setIsDarkMode(!isDarkMode);
             };
 
             const loadRandomVerse = () => {
@@ -143,19 +168,12 @@
 
             // === SUPERBIKE STARTUP LOGIC ===
             const startEngineAndApp = () => {
-                // 1. Play real motorcycle revving sound!
-                const bikeAudio = new Audio("https://actions.google.com/sounds/v1/transportation/motorcycle_rev.ogg");
-                bikeAudio.play().catch(e => console.log("Audio blocked by browser", e));
-                
-                // 2. Randomize the verse for the splash
+                playSound('bike'); // Vroooom!
                 loadRandomVerse();
-                
-                // 3. Trigger Splash Screen
                 setCurrentScreen('splash');
-                
-                // 4. Automatically go to Dashboard after bike drives across (3.8 seconds)
                 setTimeout(() => {
-                    navigateTo('dashboard');
+                    window.history.replaceState({ screen: 'dashboard' }, '');
+                    setCurrentScreen('dashboard');
                 }, 3800);
             };
 
@@ -163,9 +181,15 @@
             const handleAddItem = (e) => {
                 e.preventDefault();
                 if (selectedItem && itemPrice) {
+                    playSound('click');
                     setItems([...items, { name: selectedItem, price: parseFloat(itemPrice) }]);
                     setSelectedItem(''); setItemPrice('');
                 }
+            };
+
+            const removeItem = (index) => {
+                playSound('click');
+                setItems(items.filter((_, i) => i !== index));
             };
 
             const sparesTotal = items.reduce((sum, item) => sum + item.price, 0);
@@ -181,6 +205,7 @@
                 if(!hasVehicleDetail) return alert("Please enter at least one detail!");
                 if(items.length === 0 && !cooli) return alert("Please add at least one spare part or labor charge!");
                 
+                playSound('click');
                 setIsSubmitting(true);
                 const itemsString = items.map(i => `${i.name} (₹${i.price})`).join(', ');
                 
@@ -196,8 +221,9 @@
                     const response = await fetch(GOOGLE_SHEETS_URL, { method: 'POST', body: JSON.stringify(billData) });
                     const result = await response.json();
                     if(result.result === "success") {
+                        playSound('success'); // Triumphant sound on success!
                         fetchBills(); 
-                        loadRandomVerse(); // Randomize verse for the printed receipt
+                        loadRandomVerse(); 
                         navigateTo('receipt');
                     } else alert("Error saving to Google Sheets.");
                 } catch (error) { alert("Submission failed. Check internet connection."); }
@@ -205,6 +231,7 @@
             };
 
             const resetForm = () => {
+                playSound('click');
                 setEditingBillId(null); setBillDate(new Date().toISOString());
                 setCustomerName(''); setPhone(''); setVehicleModel(''); setVehicleNo(''); 
                 setItems([]); setCooli(''); setAdvancePaid(''); 
@@ -212,6 +239,7 @@
             };
 
             const loadBillData = (bill) => {
+                playSound('click');
                 setEditingBillId(bill.billId); setBillDate(bill.date);
                 setCustomerName(bill.customerName); setPhone(bill.phone);
                 setVehicleModel(bill.vehicleModel); setVehicleNo(bill.vehicleNo);
@@ -219,8 +247,21 @@
                 try { setItems(JSON.parse(bill.itemsJson)); } catch(e) { setItems([]); }
             };
 
+            const openPayModal = (bill) => {
+                playSound('click');
+                setPayModalBill(bill);
+                setModalPayAmount(bill.balanceDue);
+                setModalPayMethod('Cash');
+            };
+
+            const closePayModal = () => {
+                playSound('click');
+                setPayModalBill(null);
+            };
+
             const handleConfirmPayment = async () => {
                 if(!modalPayAmount || modalPayAmount <= 0) return alert("Enter a valid amount!");
+                playSound('click');
                 setIsSubmitting(true);
 
                 const payVal = parseFloat(modalPayAmount);
@@ -243,13 +284,15 @@
                     const response = await fetch(GOOGLE_SHEETS_URL, { method: 'POST', body: JSON.stringify(billData) });
                     const result = await response.json();
                     if(result.result === "success") {
-                        setPayModalBill(null); fetchBills(); alert("Payment successful!");
+                        playSound('success'); // Collection Success Sound!
+                        setPayModalBill(null); fetchBills();
                     } else alert("Error saving payment.");
                 } catch (error) { alert("Payment failed to save."); }
                 setIsSubmitting(false);
             };
 
             const handleShare = async () => {
+                playSound('click');
                 const receiptElement = document.getElementById('receipt-capture');
                 if (!receiptElement) return;
                 try {
@@ -308,7 +351,6 @@
                 </button>
             );
 
-            // WhatsApp Style List Item (NOW WITH EDIT BUTTON!)
             const BillListItem = ({ bill }) => {
                 const initial = bill.customerName ? bill.customerName.charAt(0).toUpperCase() : 'M';
                 return (
@@ -331,7 +373,6 @@
                             </div>
                         </div>
                         
-                        {/* Status & Edit Button Footer */}
                         <div className={`flex justify-between items-center pt-3 mt-1 border-t ${isDarkMode ? 'border-slate-700' : 'border-slate-200'}`}>
                             {bill.balanceDue > 0 ? (
                                 <span className="bg-pink-500/20 text-pink-500 px-3 py-1 rounded-lg text-xs font-bold border border-pink-500/20">Pending: ₹{bill.balanceDue}</span>
@@ -339,7 +380,6 @@
                                 <span className="bg-emerald-500/20 text-emerald-500 px-3 py-1 rounded-lg text-xs font-bold border border-emerald-500/20">Fully Paid</span>
                             )}
                             
-                            {/* THE MISSING EDIT BUTTON */}
                             <button 
                                 onClick={(e) => { e.stopPropagation(); loadBillData(bill); navigateTo('newBill'); }} 
                                 className={`flex items-center gap-1 text-indigo-500 ${isDarkMode ? 'bg-indigo-500/10 hover:bg-indigo-500/20' : 'bg-indigo-100 hover:bg-indigo-200'} px-4 py-1.5 rounded-xl text-sm font-bold border border-indigo-500/20 active:scale-95 transition-transform`}
@@ -355,7 +395,6 @@
             return (
                 <div className={`${theme.bg} min-h-screen transition-colors duration-300 font-sans`}>
                     
-                    {/* PRE-SPLASH: Interacting allows Audio to play! */}
                     {currentScreen === 'pre-splash' && (
                         <div className="min-h-screen flex flex-col items-center justify-center relative overflow-hidden bg-[#0f172a]">
                             <div className="text-center z-10 p-6 flex flex-col items-center">
@@ -369,12 +408,10 @@
                         </div>
                     )}
 
-                    {/* SUPERBIKE SPLASH SCREEN! */}
                     {currentScreen === 'splash' && (
                         <div className="min-h-screen flex flex-col items-center justify-center relative overflow-hidden bg-[#0f172a]">
                             <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/stardust.png')] opacity-20"></div>
                             
-                            {/* Vault Bible Verse */}
                             <div className="z-10 text-center px-6 mb-12 max-w-sm">
                                 <p className="text-xl font-bold text-white leading-relaxed mb-3 drop-shadow-[0_0_10px_rgba(255,255,255,0.5)]">{currentVerse.tamil}</p>
                                 <p className="text-xs italic font-serif text-cyan-300 drop-shadow-[0_0_5px_rgba(34,211,238,0.8)]">{currentVerse.text} - {currentVerse.ref}</p>
@@ -386,10 +423,14 @@
                                 <h2 className="text-sm tracking-widest uppercase text-slate-300 font-bold">Two Wheelar Workshop</h2>
                             </div>
 
-                            {/* Animated Superbike PNG */}
-                            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/ca/Triumph_Daytona_675.png/1024px-Triumph_Daytona_675.png" className="bike-animation drop-shadow-[0_20px_20px_rgba(34,211,238,0.3)]" alt="Superbike" />
+                            {/* 🌟 ROCK SOLID, HOTLINK-FRIENDLY HD SUPERBIKE 🌟 */}
+                            <img 
+                                src="https://purepng.com/public/uploads/large/purepng.com-motorcyclemotorcyclemotorbikebike-17015284852932oeei.png" 
+                                onError={(e) => { e.target.onerror = null; e.target.src="https://freepngimg.com/thumb/motorcycle/2-2-motorcycle-png-hd.png" }}
+                                className="bike-animation drop-shadow-[0_20px_20px_rgba(34,211,238,0.3)]" 
+                                alt="Superbike" 
+                            />
                             
-                            {/* Moving Road */}
                             <div className="absolute bottom-[24%] w-full h-1 road-animation z-40 opacity-50"></div>
                         </div>
                     )}
@@ -405,7 +446,7 @@
                                             <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span> Online
                                         </p>
                                     </div>
-                                    <button onClick={() => setIsDarkMode(!isDarkMode)} className={`w-10 h-10 rounded-full flex items-center justify-center ${theme.card} text-xl shadow-md`}>
+                                    <button onClick={toggleTheme} className={`w-10 h-10 rounded-full flex items-center justify-center ${theme.card} text-xl shadow-md`}>
                                         {isDarkMode ? '☀️' : '🌙'}
                                     </button>
                                 </div>
@@ -475,7 +516,7 @@
                                                 <button onClick={() => { loadBillData(bill); navigateTo('newBill'); }} className={`w-1/3 text-indigo-500 font-bold text-sm py-3 rounded-xl border border-indigo-500/30 active:scale-95 transition-transform`}>
                                                     ✏️ Edit
                                                 </button>
-                                                <button onClick={() => { setPayModalBill(bill); setModalPayAmount(bill.balanceDue); setModalPayMethod('Cash'); }} className={`flex-1 ${isDarkMode ? 'bg-slate-900 text-indigo-400' : 'bg-indigo-50 text-indigo-700'} font-bold text-lg py-3 rounded-xl border border-indigo-500/30 active:scale-95 transition-transform`}>
+                                                <button onClick={() => openPayModal(bill)} className={`flex-1 ${isDarkMode ? 'bg-slate-900 text-indigo-400' : 'bg-indigo-50 text-indigo-700'} font-bold text-lg py-3 rounded-xl border border-indigo-500/30 active:scale-95 transition-transform`}>
                                                     Collect
                                                 </button>
                                             </div>
@@ -487,13 +528,13 @@
                             {payModalBill && (
                                 <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
                                     <div className={`${theme.glass} border border-indigo-500/30 rounded-3xl p-6 w-full max-w-sm shadow-2xl relative`}>
-                                        <button onClick={() => setPayModalBill(null)} className={`absolute top-4 right-4 w-10 h-10 ${theme.input} rounded-full font-bold text-xl`}>X</button>
+                                        <button onClick={closePayModal} className={`absolute top-4 right-4 w-10 h-10 ${theme.input} rounded-full font-bold text-xl`}>X</button>
                                         <h2 className={`text-2xl font-black ${theme.text} mb-2`}>Receive Payment</h2>
                                         <p className={`text-base ${theme.textMuted} mb-6 font-bold`}>{payModalBill.customerName} - {payModalBill.vehicleModel}</p>
                                         
                                         <div className={`flex gap-2 mb-6 p-2 ${theme.input} rounded-2xl`}>
-                                            <button onClick={() => setModalPayMethod('Cash')} className={`w-1/2 py-3 text-lg rounded-xl font-bold transition-colors ${modalPayMethod === 'Cash' ? theme.primaryGradient + ' text-white shadow-md' : theme.textMuted}`}>Cash</button>
-                                            <button onClick={() => setModalPayMethod('QR')} className={`w-1/2 py-3 text-lg rounded-xl font-bold transition-colors ${modalPayMethod === 'QR' ? theme.primaryGradient + ' text-white shadow-md' : theme.textMuted}`}>QR Scan</button>
+                                            <button onClick={() => {playSound('click'); setModalPayMethod('Cash')}} className={`w-1/2 py-3 text-lg rounded-xl font-bold transition-colors ${modalPayMethod === 'Cash' ? theme.primaryGradient + ' text-white shadow-md' : theme.textMuted}`}>Cash</button>
+                                            <button onClick={() => {playSound('click'); setModalPayMethod('QR')}} className={`w-1/2 py-3 text-lg rounded-xl font-bold transition-colors ${modalPayMethod === 'QR' ? theme.primaryGradient + ' text-white shadow-md' : theme.textMuted}`}>QR Scan</button>
                                         </div>
 
                                         <div className="mb-6">
@@ -553,7 +594,7 @@
                                             <span>{item.name}</span>
                                             <div className="flex items-center gap-4">
                                                 <span className={`${theme.text} text-lg`}>₹{item.price}</span>
-                                                <button onClick={() => setItems(items.filter((_, i) => i !== index))} className="text-pink-500 text-2xl px-2">×</button>
+                                                <button onClick={() => removeItem(index)} className="text-pink-500 text-2xl px-2">×</button>
                                             </div>
                                         </div>
                                     ))}
@@ -611,7 +652,7 @@
                                     <p className="text-sm opacity-90 font-medium">Srivilliputtur</p>
                                     <p className="text-sm font-bold opacity-90">Ph: +91 9876543210</p> 
                                     
-                                    {/* 🌟 YOUR BIBLE.JS VAULT VERSE 🌟 */}
+                                    {/* 🌟 RANDOM VAULT BIBLE VERSE 🌟 */}
                                     <div className="mt-5 p-4 bg-black/20 rounded-2xl shadow-sm border border-white/10">
                                         <p className="text-base font-bold mb-2 leading-relaxed">{currentVerse.tamil}</p>
                                         <p className="text-xs italic font-serif opacity-80">{currentVerse.text} - {currentVerse.ref}</p>
@@ -659,10 +700,9 @@
                                 <div className="bg-slate-50 p-5 text-center"><p className="text-slate-600 font-bold text-base">நன்றி! மீண்டும் வருக!</p></div>
                             </div>
 
-                            {/* 🌟 ACTION BUTTONS (NOW WITH QUICK EDIT BUTTON) 🌟 */}
                             <div className="mt-8 flex gap-3">
                                 <button onClick={() => navigateTo('dashboard')} className={`w-1/4 ${theme.card} ${theme.text} font-bold text-sm py-4 rounded-2xl active:scale-95 transition-transform shadow-lg`}>Home</button>
-                                <button onClick={() => navigateTo('newBill')} className={`w-1/4 ${isDarkMode ? 'bg-indigo-500/20 text-indigo-400 border border-indigo-500/30' : 'bg-indigo-100 text-indigo-600 border border-indigo-300'} font-bold text-sm py-4 rounded-2xl active:scale-95 transition-transform shadow-lg`}>✏️ Edit</button>
+                                <button onClick={() => { playSound('click'); navigateTo('newBill'); }} className={`w-1/4 ${isDarkMode ? 'bg-indigo-500/20 text-indigo-400 border border-indigo-500/30' : 'bg-indigo-100 text-indigo-600 border border-indigo-300'} font-bold text-sm py-4 rounded-2xl active:scale-95 transition-transform shadow-lg`}>✏️ Edit</button>
                                 <button onClick={handleShare} className="flex-1 bg-gradient-to-r from-emerald-400 to-emerald-500 text-slate-900 font-black text-lg py-4 rounded-2xl glow-button active:scale-95 transition-transform shadow-xl">
                                     Share Bill
                                 </button>
