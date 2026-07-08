@@ -16,7 +16,7 @@
     <!-- 🌟 CONNECTS YOUR 365 BIBLE VERSES FROM THE VAULT 🌟 -->
     <script src="./bible.js"></script>
 
-    <!-- Custom CSS for Scrollbars, Animations & The Superbike! -->
+    <!-- Custom CSS for Scrollbars & Cinematic Animations -->
     <style>
         ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-track { background: transparent; }
@@ -24,29 +24,26 @@
         .glow-input:focus { box-shadow: 0 0 15px rgba(99, 102, 241, 0.4); border-color: #6366f1; }
         .glow-button { box-shadow: 0 0 20px rgba(139, 92, 246, 0.5); }
         
-        /* The Superbike Animation */
-        @keyframes driveBike {
-            0% { transform: translateX(-150vw) scale(0.8) rotate(-15deg); opacity: 0; }
-            30% { transform: translateX(-20vw) scale(1.1) rotate(0deg); opacity: 1; }
-            70% { transform: translateX(20vw) scale(1.1) rotate(0deg); opacity: 1; }
-            100% { transform: translateX(150vw) scale(0.8) rotate(15deg); opacity: 0; }
+        /* 🌟 CINEMATIC SPLASH SCREEN ANIMATIONS 🌟 */
+        @keyframes fadeOutVerse {
+            0% { opacity: 0; transform: scale(0.95); }
+            15% { opacity: 1; transform: scale(1); }
+            80% { opacity: 1; transform: scale(1); }
+            100% { opacity: 0; transform: scale(1.05); }
         }
-        @keyframes roadMove {
-            0% { background-position: 0 0; }
-            100% { background-position: -200px 0; }
+        @keyframes fadeInBike {
+            0% { opacity: 0; transform: scale(1.15); filter: blur(4px); }
+            15% { opacity: 1; transform: scale(1); filter: blur(0px); }
+            85% { opacity: 1; transform: scale(1); filter: blur(0px); }
+            100% { opacity: 0; transform: scale(1.05); filter: blur(3px); }
         }
-        .bike-animation {
-            animation: driveBike 3.5s cubic-bezier(0.25, 1, 0.5, 1) forwards;
-            position: absolute;
-            bottom: 25%;
-            width: 280px;
-            z-index: 50;
-            filter: drop-shadow(0px 20px 10px rgba(34,211,238,0.3));
+        .phase-1 {
+            animation: fadeOutVerse 3s cubic-bezier(0.25, 1, 0.5, 1) forwards;
         }
-        .road-animation {
-            background-image: linear-gradient(90deg, #64748b 50%, transparent 50%);
-            background-size: 40px 100%;
-            animation: roadMove 0.5s linear infinite;
+        .phase-2 {
+            animation: fadeInBike 3.5s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+            animation-delay: 2.8s; /* Waits for the verse to finish */
+            opacity: 0;
         }
     </style>
 </head>
@@ -56,18 +53,15 @@
     <script type="text/babel">
         const { useState, useEffect } = React;
         
-        // Your exact Google Apps Script URL
+        // Connected to your exact Google Script URL
         const GOOGLE_SHEETS_URL = "https://script.google.com/macros/s/AKfycbyOzAZoSlxeTHk0A2uEM8Ehsc8aKSgDeSd3eNvi1r7ylDkYHLVH144PdeHH1hkw0i0/exec"; 
 
         // 🌟 GLOBAL AUDIO MANAGER 🌟
         const playSound = (type) => {
             try {
                 let url = '';
-                // Soft UI Click
                 if(type === 'click') url = 'https://assets.mixkit.co/active_storage/sfx/2568/2568-preview.mp3'; 
-                // Triumphant Success Sound for Generating Bills
                 if(type === 'success') url = 'https://assets.mixkit.co/active_storage/sfx/1435/1435-preview.mp3'; 
-                // Fast Motorcycle Pass for Splash
                 if(type === 'bike') url = 'https://assets.mixkit.co/active_storage/sfx/1632/1632-preview.mp3'; 
                 
                 const audio = new Audio(url);
@@ -78,14 +72,14 @@
 
         function App() {
             // === CONFIG ===
-            const upiID = "weslyragland-1@okaxis"; // Your exact UPI ID
+            const upiID = "weslyragland-1@okaxis"; // Connected to your UPI ID
             const shopName = "Mary Two Wheelar Workshop";
             
             // === STATE ===
             const [isDarkMode, setIsDarkMode] = useState(true); 
             const [currentScreen, setCurrentScreen] = useState('pre-splash');
             
-            // Daily Verse State (Pulls from bible.js vault)
+            // Daily Verse State (Pulls from your bible.js vault)
             const fallbackVerse = { tamil: '"கர்த்தர் என் மேய்ப்பராயிருக்கிறார்; நான் தாழ்ச்சியடையேன்."', text: '"The Lord is my shepherd; I shall not want."', ref: "Psalm 23:1" };
             const [currentVerse, setCurrentVerse] = useState(() => {
                 return typeof getCalculatedDailyVerseObject === 'function' ? getCalculatedDailyVerseObject() : fallbackVerse;
@@ -166,15 +160,20 @@
                 }
             };
 
-            // === SUPERBIKE STARTUP LOGIC ===
+            // 🌟 EXTENDED CINEMATIC SPLASH ENGINE 🌟
             const startEngineAndApp = () => {
-                playSound('bike'); // Vroooom!
+                playSound('click'); 
                 loadRandomVerse();
                 setCurrentScreen('splash');
+                
+                // Bike roars perfectly synced with Phase 2 (at 2.6 seconds)
+                setTimeout(() => { playSound('bike'); }, 2600);
+                
+                // Dashboard loads smoothly after the epic 6.5 second sequence
                 setTimeout(() => {
                     window.history.replaceState({ screen: 'dashboard' }, '');
                     setCurrentScreen('dashboard');
-                }, 3800);
+                }, 6500);
             };
 
             // === MATH & SUBMIT ===
@@ -221,7 +220,7 @@
                     const response = await fetch(GOOGLE_SHEETS_URL, { method: 'POST', body: JSON.stringify(billData) });
                     const result = await response.json();
                     if(result.result === "success") {
-                        playSound('success'); // Triumphant sound on success!
+                        playSound('success'); 
                         fetchBills(); 
                         loadRandomVerse(); 
                         navigateTo('receipt');
@@ -284,7 +283,7 @@
                     const response = await fetch(GOOGLE_SHEETS_URL, { method: 'POST', body: JSON.stringify(billData) });
                     const result = await response.json();
                     if(result.result === "success") {
-                        playSound('success'); // Collection Success Sound!
+                        playSound('success'); 
                         setPayModalBill(null); fetchBills();
                     } else alert("Error saving payment.");
                 } catch (error) { alert("Payment failed to save."); }
@@ -395,6 +394,7 @@
             return (
                 <div className={`${theme.bg} min-h-screen transition-colors duration-300 font-sans`}>
                     
+                    {/* PRE-SPLASH: Interacting allows Audio to play! */}
                     {currentScreen === 'pre-splash' && (
                         <div className="min-h-screen flex flex-col items-center justify-center relative overflow-hidden bg-[#0f172a]">
                             <div className="text-center z-10 p-6 flex flex-col items-center">
@@ -408,30 +408,36 @@
                         </div>
                     )}
 
+                    {/* 🌟 EPIC 6.5s CINEMATIC SPLASH SCREEN 🌟 */}
                     {currentScreen === 'splash' && (
                         <div className="min-h-screen flex flex-col items-center justify-center relative overflow-hidden bg-[#0f172a]">
-                            <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/stardust.png')] opacity-20"></div>
+                            <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/stardust.png')] opacity-30"></div>
                             
-                            <div className="z-10 text-center px-6 mb-12 max-w-sm">
-                                <p className="text-xl font-bold text-white leading-relaxed mb-3 drop-shadow-[0_0_10px_rgba(255,255,255,0.5)]">{currentVerse.tamil}</p>
-                                <p className="text-xs italic font-serif text-cyan-300 drop-shadow-[0_0_5px_rgba(34,211,238,0.8)]">{currentVerse.text} - {currentVerse.ref}</p>
+                            {/* PHASE 1: BIBLE VERSE */}
+                            <div className="phase-1 absolute inset-0 flex flex-col items-center justify-center p-8 z-20">
+                                <p className="text-2xl md:text-3xl font-bold text-white leading-relaxed mb-6 text-center drop-shadow-[0_0_15px_rgba(255,255,255,0.6)]">
+                                    {currentVerse.tamil}
+                                </p>
+                                <p className="text-base md:text-lg italic font-serif text-cyan-300 text-center drop-shadow-[0_0_8px_rgba(34,211,238,0.8)]">
+                                    {currentVerse.text} - {currentVerse.ref}
+                                </p>
                             </div>
 
-                            <div className="z-10 text-center mb-16">
-                                <h1 className="text-5xl font-black tracking-widest uppercase font-serif bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 to-indigo-500 drop-shadow-[0_0_15px_rgba(99,102,241,0.5)]">Mary</h1>
-                                <div className="h-px w-32 mx-auto bg-cyan-500/50 my-3"></div>
-                                <h2 className="text-sm tracking-widest uppercase text-slate-300 font-bold">Two Wheelar Workshop</h2>
+                            {/* PHASE 2: HD SUPERBIKE & LOGO */}
+                            <div className="phase-2 absolute inset-0 flex flex-col items-center justify-center p-4 z-30 bg-[#0f172a]">
+                                <div className="absolute top-16 text-center w-full">
+                                    <h1 className="text-5xl font-black tracking-widest uppercase font-serif bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 to-indigo-500 drop-shadow-[0_0_15px_rgba(99,102,241,0.5)] mb-2">Mary</h1>
+                                    <div className="h-px w-24 mx-auto bg-cyan-500/50 my-4"></div>
+                                    <h2 className="text-sm tracking-[0.3em] uppercase text-slate-300 font-bold">Two Wheelar Workshop</h2>
+                                </div>
+                                
+                                <img 
+                                    src="https://purepng.com/public/uploads/large/purepng.com-motorcyclemotorcyclemotorbikebike-17015284852932oeei.png" 
+                                    onError={(e) => { e.target.onerror = null; e.target.src="https://freepngimg.com/thumb/motorcycle/2-2-motorcycle-png-hd.png" }}
+                                    className="w-[140%] max-w-lg object-contain drop-shadow-[0_30px_30px_rgba(34,211,238,0.4)] mt-24" 
+                                    alt="Superbike" 
+                                />
                             </div>
-
-                            {/* 🌟 ROCK SOLID, HOTLINK-FRIENDLY HD SUPERBIKE 🌟 */}
-                            <img 
-                                src="https://purepng.com/public/uploads/large/purepng.com-motorcyclemotorcyclemotorbikebike-17015284852932oeei.png" 
-                                onError={(e) => { e.target.onerror = null; e.target.src="https://freepngimg.com/thumb/motorcycle/2-2-motorcycle-png-hd.png" }}
-                                className="bike-animation drop-shadow-[0_20px_20px_rgba(34,211,238,0.3)]" 
-                                alt="Superbike" 
-                            />
-                            
-                            <div className="absolute bottom-[24%] w-full h-1 road-animation z-40 opacity-50"></div>
                         </div>
                     )}
 
