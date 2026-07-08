@@ -11,16 +11,14 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     
     <style>
-        body { background-color: #0f172a; color: #f8fafc; }
         ::-webkit-scrollbar { width: 6px; }
-        ::-webkit-scrollbar-track { background: #1e293b; }
-        ::-webkit-scrollbar-thumb { background: #3b82f6; border-radius: 10px; }
-        .glass-panel { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.1); }
-        .glow-input:focus { box-shadow: 0 0 15px rgba(34, 211, 238, 0.4); border-color: #22d3ee; }
-        .glow-button { box-shadow: 0 0 20px rgba(99, 102, 241, 0.5); }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #6366f1; border-radius: 10px; }
+        .glow-input:focus { box-shadow: 0 0 15px rgba(99, 102, 241, 0.4); border-color: #6366f1; }
+        .glow-button { box-shadow: 0 0 20px rgba(139, 92, 246, 0.5); }
     </style>
 </head>
-<body class="font-sans antialiased selection:bg-cyan-500 selection:text-white">
+<body class="font-sans antialiased selection:bg-indigo-500 selection:text-white transition-colors duration-300">
     <div id="root"></div>
 
     <script type="text/babel">
@@ -29,20 +27,18 @@
 
         function App() {
             // === CONFIG ===
-            const upiID = "raniusisrael@okicici"; // <-- PUT HIS REAL UPI ID HERE
+            const upiID = "weslyragland-1@okaxis"; // <-- PUT HIS REAL UPI ID HERE
             const shopName = "Mary Two Wheelar Workshop";
-            const verses = [
-                '"The Lord is my shepherd; I shall not want." - Psalm 23:1',
-                '"I can do all things through Christ who strengthens me." - Philippians 4:13',
-                '"For with God nothing will be impossible." - Luke 1:37',
-                '"Commit to the Lord whatever you do, and he will establish your plans." - Proverbs 16:3',
-                '"The Lord bless you and keep you." - Numbers 6:24'
-            ];
-            const dayOfYear = Math.floor((new Date() - new Date(new Date().getFullYear(), 0, 0)) / 1000 / 60 / 60 / 24);
-            const dailyVerse = verses[dayOfYear % verses.length];
+            
+            // Temporary Dual-Language Bible Verse Mockup (Ready for your bible.js)
+            const dailyVerseTamil = '"கர்த்தர் என் மேய்ப்பராயிருக்கிறார்; நான் தாழ்ச்சியடையேன்."';
+            const dailyVerseEnglish = '"The Lord is my shepherd; I shall not want." - Psalm 23:1';
 
             // === STATE ===
+            const [isDarkMode, setIsDarkMode] = useState(true); // Day/Night Mode State
             const [currentScreen, setCurrentScreen] = useState('splash');
+            
+            // Form States
             const [customerName, setCustomerName] = useState('');
             const [phone, setPhone] = useState('');
             const [vehicleModel, setVehicleModel] = useState('');
@@ -64,15 +60,24 @@
             const [modalPayAmount, setModalPayAmount] = useState('');
             const [modalPayMethod, setModalPayMethod] = useState('Cash');
 
+            // === THEME CLASSES (Dynamic Light/Dark Mode) ===
+            const theme = {
+                bg: isDarkMode ? 'bg-[#0f172a]' : 'bg-slate-100',
+                text: isDarkMode ? 'text-slate-100' : 'text-slate-900',
+                textMuted: isDarkMode ? 'text-slate-400' : 'text-slate-500',
+                glass: isDarkMode ? 'bg-slate-800/80 border-slate-700/50 backdrop-blur-xl' : 'bg-white border-slate-200 shadow-xl',
+                input: isDarkMode ? 'bg-slate-900 border-slate-700 text-white' : 'bg-slate-50 border-slate-300 text-slate-900',
+                card: isDarkMode ? 'bg-slate-800/90 border-slate-700/50' : 'bg-white border-slate-200 shadow-md',
+                primaryGradient: 'bg-gradient-to-r from-violet-600 to-indigo-600'
+            };
+
             // === FETCH DATA ON LOAD ===
             const fetchBills = async () => {
                 setIsLoadingBills(true);
                 try {
                     const response = await fetch(GOOGLE_SHEETS_URL);
                     const json = await response.json();
-                    if (json.result === 'success') {
-                        setAllBills(json.data.reverse()); 
-                    }
+                    if (json.result === 'success') setAllBills(json.data.reverse()); 
                 } catch (error) { console.error("Failed to load bills"); }
                 setIsLoadingBills(false);
             };
@@ -121,7 +126,7 @@
 
             const handleSubmitBill = async () => {
                 const hasVehicleDetail = customerName.trim() || phone.trim() || vehicleModel.trim() || vehicleNo.trim();
-                if(!hasVehicleDetail) return alert("Please enter at least one detail (Name, Phone, Model, or Number)!");
+                if(!hasVehicleDetail) return alert("Please enter at least one detail!");
                 if(items.length === 0 && !cooli) return alert("Please add at least one spare part or labor charge!");
                 
                 setIsSubmitting(true);
@@ -129,10 +134,8 @@
                 
                 const billData = {
                     action: editingBillId ? "update" : "create",
-                    billId: editingBillId,
-                    customerName, phone, vehicleModel, vehicleNo, 
-                    itemsString: itemsString, itemsArray: items,        
-                    sparesTotal, cooli: parseFloat(cooli) || 0,
+                    billId: editingBillId, customerName, phone, vehicleModel, vehicleNo, 
+                    itemsString: itemsString, itemsArray: items, sparesTotal, cooli: parseFloat(cooli) || 0,
                     grandTotal, paymentMethod: "Advance", amountPaid: currentAdvance, 
                     balanceDue, status: paymentStatus
                 };
@@ -141,7 +144,7 @@
                     const response = await fetch(GOOGLE_SHEETS_URL, { method: 'POST', body: JSON.stringify(billData) });
                     const result = await response.json();
                     if(result.result === "success") {
-                        fetchBills(); // Refresh list silently
+                        fetchBills(); 
                         navigateTo('receipt');
                     } else alert("Error saving to Google Sheets.");
                 } catch (error) { alert("Submission failed. Check internet connection."); }
@@ -220,349 +223,358 @@
             const totalPendingAmount = pendingBills.reduce((sum, bill) => sum + parseFloat(bill.balanceDue), 0);
 
             // ==========================================
-            // UI COMPONENTS (WhatsApp Style + Premium Theme)
+            // REUSABLE UI COMPONENTS
             // ==========================================
             
-            // 1. BOTTOM NAVIGATION COMPONENT
+            const HeaderWord = () => (
+                <div className="w-full text-center pt-2 pb-1">
+                    <span className="font-serif italic font-extrabold text-lg text-yellow-500 tracking-wide">தேவனுக்கே மகிமை</span>
+                </div>
+            );
+
             const BottomNav = () => (
-                <div className="fixed bottom-0 w-full max-w-md mx-auto inset-x-0 glass-panel border-t border-slate-700/50 flex justify-around p-3 z-40 pb-6 rounded-t-3xl">
-                    <button onClick={() => navigateTo('dashboard')} className={`flex flex-col items-center gap-1 transition-all ${currentScreen === 'dashboard' ? 'text-cyan-400 scale-110' : 'text-slate-400 hover:text-slate-300'}`}>
-                        <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20"><path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z"></path></svg>
-                        <span className="text-[10px] font-medium">Home</span>
+                <div className={`fixed bottom-0 w-full max-w-md mx-auto inset-x-0 ${theme.glass} border-t flex justify-around p-3 z-40 pb-6 rounded-t-3xl`}>
+                    <button onClick={() => navigateTo('dashboard')} className={`flex flex-col items-center gap-1 transition-all ${currentScreen === 'dashboard' ? 'text-indigo-500 scale-110 font-bold' : theme.textMuted}`}>
+                        <svg className="w-7 h-7" fill="currentColor" viewBox="0 0 20 20"><path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z"></path></svg>
+                        <span className="text-[11px]">Home</span>
                     </button>
-                    <button onClick={() => navigateTo('search')} className={`flex flex-col items-center gap-1 transition-all ${currentScreen === 'search' ? 'text-cyan-400 scale-110' : 'text-slate-400 hover:text-slate-300'}`}>
-                        <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clipRule="evenodd"></path></svg>
-                        <span className="text-[10px] font-medium">Search</span>
+                    <button onClick={() => navigateTo('search')} className={`flex flex-col items-center gap-1 transition-all ${currentScreen === 'search' ? 'text-indigo-500 scale-110 font-bold' : theme.textMuted}`}>
+                        <svg className="w-7 h-7" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clipRule="evenodd"></path></svg>
+                        <span className="text-[11px]">Search</span>
                     </button>
-                    <button onClick={() => navigateTo('pending')} className={`flex flex-col items-center gap-1 transition-all ${currentScreen === 'pending' ? 'text-cyan-400 scale-110' : 'text-slate-400 hover:text-slate-300'}`}>
-                        <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M4 4a2 2 0 00-2 2v4a2 2 0 002 2V6h10a2 2 0 00-2-2H4zm2 6a2 2 0 012-2h8a2 2 0 012 2v4a2 2 0 01-2 2H8a2 2 0 01-2-2v-4zm6 4a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd"></path></svg>
-                        <span className="text-[10px] font-medium">Dues</span>
+                    <button onClick={() => navigateTo('pending')} className={`flex flex-col items-center gap-1 transition-all ${currentScreen === 'pending' ? 'text-indigo-500 scale-110 font-bold' : theme.textMuted}`}>
+                        <svg className="w-7 h-7" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M4 4a2 2 0 00-2 2v4a2 2 0 002 2V6h10a2 2 0 00-2-2H4zm2 6a2 2 0 012-2h8a2 2 0 012 2v4a2 2 0 01-2 2H8a2 2 0 01-2-2v-4zm6 4a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd"></path></svg>
+                        <span className="text-[11px]">Dues</span>
                     </button>
                 </div>
             );
 
-            // 2. FLOATING ACTION BUTTON (New Bill)
             const Fab = () => (
-                <button onClick={resetForm} className="fixed bottom-24 right-4 w-14 h-14 bg-gradient-to-tr from-cyan-500 to-indigo-600 rounded-full flex items-center justify-center text-white text-3xl glow-button active:scale-95 transition-all z-40 border border-cyan-300/30">
+                <button onClick={resetForm} className={`fixed bottom-24 right-4 w-16 h-16 ${theme.primaryGradient} rounded-full flex items-center justify-center text-white text-4xl glow-button active:scale-95 transition-all z-40 border border-white/20 shadow-xl`}>
                     +
                 </button>
             );
 
-            // 3. WHATSAPP STYLE LIST ITEM (For Bills)
             const BillListItem = ({ bill }) => {
                 const initial = bill.customerName ? bill.customerName.charAt(0).toUpperCase() : 'M';
                 return (
-                    <div className="glass-panel p-4 mb-3 rounded-2xl flex items-center gap-4 transition-transform active:scale-95 cursor-pointer">
-                        {/* Avatar */}
-                        <div className="w-12 h-12 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white font-bold text-xl shadow-lg border border-indigo-400/30 shrink-0">
+                    <div className={`${theme.card} p-4 mb-4 rounded-2xl flex items-center gap-4 transition-transform active:scale-95 cursor-pointer`} onClick={() => { loadBillData(bill); navigateTo('receipt'); }}>
+                        <div className={`w-14 h-14 rounded-full ${theme.primaryGradient} flex items-center justify-center text-white font-bold text-2xl shadow-lg shrink-0`}>
                             {initial}
                         </div>
-                        {/* Details */}
-                        <div className="flex-1 min-w-0" onClick={() => { loadBillData(bill); navigateTo('receipt'); }}>
+                        <div className="flex-1 min-w-0">
                             <div className="flex justify-between items-baseline mb-1">
-                                <h3 className="font-bold text-white text-lg truncate">{bill.customerName || 'Customer'}</h3>
-                                <span className="text-xs text-cyan-400 font-medium whitespace-nowrap ml-2">
+                                <h3 className={`font-bold ${theme.text} text-xl truncate`}>{bill.customerName || 'Customer'}</h3>
+                                <span className="text-sm text-indigo-500 font-bold whitespace-nowrap ml-2">
                                     {bill.date ? new Date(bill.date).toLocaleDateString([], {month:'short', day:'numeric'}) : ''}
                                 </span>
                             </div>
                             <div className="flex justify-between items-center">
-                                <p className="text-sm text-slate-400 truncate pr-2">{bill.vehicleModel} {bill.vehicleNo ? `- ${bill.vehicleNo}` : ''}</p>
-                                <span className="font-bold text-white">₹{bill.grandTotal}</span>
+                                <p className={`text-base ${theme.textMuted} truncate pr-2`}>{bill.vehicleModel} {bill.vehicleNo ? `- ${bill.vehicleNo}` : ''}</p>
+                                <span className={`font-bold ${theme.text} text-lg`}>₹{bill.grandTotal}</span>
                             </div>
-                            {/* Status Pills */}
                             {bill.balanceDue > 0 ? (
-                                <p className="text-xs text-pink-400 font-medium mt-1">Pending: ₹{bill.balanceDue}</p>
+                                <p className="text-sm text-pink-500 font-bold mt-1">Pending: ₹{bill.balanceDue}</p>
                             ) : (
-                                <p className="text-xs text-emerald-400 font-medium mt-1">Fully Paid</p>
+                                <p className="text-sm text-emerald-500 font-bold mt-1">Fully Paid</p>
                             )}
                         </div>
                     </div>
                 );
             };
 
-            // === SCREENS ===
-            
-            if (currentScreen === 'splash') {
-                return (
-                    <div className="min-h-screen flex flex-col items-center justify-center bg-[#0f172a]">
-                        <div className="border border-cyan-500/30 p-10 rounded-full shadow-[0_0_80px_rgba(34,211,238,0.15)] flex flex-col items-center justify-center w-64 h-64 bg-slate-900/50 backdrop-blur-xl relative">
-                            <div className="absolute inset-0 rounded-full border border-cyan-400/20 animate-ping opacity-20"></div>
-                            <h1 className="text-4xl font-black tracking-widest uppercase text-center font-serif bg-clip-text text-transparent bg-gradient-to-r from-cyan-300 to-blue-500">Mary</h1>
-                            <div className="h-px w-20 bg-cyan-500/50 my-3"></div>
-                            <h2 className="text-xs tracking-widest uppercase text-center text-slate-400">Workshop<br/>System</h2>
-                        </div>
-                    </div>
-                );
-            }
-
-            if (currentScreen === 'dashboard') {
-                return (
-                    <div className="min-h-screen pb-24 max-w-md mx-auto relative">
-                        {/* Sticky Top Header */}
-                        <div className="sticky top-0 z-30 glass-panel border-b border-slate-700/50 p-4 pt-6 rounded-b-3xl mb-4 shadow-xl">
-                            <h1 className="text-2xl font-black tracking-wide text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-indigo-400">Mary Workshop</h1>
-                            <p className="text-xs font-medium text-slate-400 mt-1 flex items-center gap-2">
-                                <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span> System Online
-                            </p>
-                        </div>
-                        
-                        <div className="px-4">
-                            <h2 className="text-sm font-bold text-slate-500 uppercase tracking-wider mb-3 ml-2">Recent Bills</h2>
-                            {isLoadingBills ? (
-                                <div className="text-center text-cyan-500 mt-10 animate-pulse font-medium">Syncing database...</div>
-                            ) : (
-                                <div>
-                                    {allBills.length === 0 ? <p className="text-slate-500 text-center mt-10">No records found.</p> : allBills.map((bill, idx) => <BillListItem key={idx} bill={bill} />)}
-                                </div>
-                            )}
-                        </div>
-                        <Fab />
-                        <BottomNav />
-                    </div>
-                );
-            }
-
-            if (currentScreen === 'search') {
-                return (
-                    <div className="min-h-screen pb-24 max-w-md mx-auto">
-                        <div className="sticky top-0 z-30 glass-panel border-b border-slate-700/50 p-4 pt-6 rounded-b-3xl mb-4 shadow-xl">
-                            <input 
-                                type="text" 
-                                placeholder="Search Name, Bike, or Phone..." 
-                                className="w-full bg-slate-900 border border-slate-700 text-white rounded-xl p-4 pl-5 outline-none glow-input transition-all placeholder-slate-500 font-medium"
-                                value={searchQuery}
-                                onChange={(e) => setSearchQuery(e.target.value)}
-                            />
-                        </div>
-                        <div className="px-4">
-                            {isLoadingBills ? <div className="text-center text-cyan-500 mt-10 animate-pulse">Syncing...</div> : (
-                                filteredBills.map((bill, idx) => <BillListItem key={idx} bill={bill} />)
-                            )}
-                        </div>
-                        <Fab />
-                        <BottomNav />
-                    </div>
-                );
-            }
-
-            if (currentScreen === 'pending') {
-                return (
-                    <div className="min-h-screen pb-24 max-w-md mx-auto relative">
-                        <div className="sticky top-0 z-30 glass-panel border-b border-slate-700/50 p-4 pt-6 rounded-b-3xl mb-4 shadow-xl">
-                            <h1 className="text-xl font-bold text-white mb-2">Pending Dues</h1>
-                            <div className="bg-gradient-to-r from-pink-600 to-rose-600 p-5 rounded-2xl shadow-lg border border-pink-400/30">
-                                <p className="text-xs font-medium text-pink-200 mb-1 uppercase tracking-wider">Total Outstanding</p>
-                                <h2 className="text-3xl font-black text-white">₹{totalPendingAmount.toFixed(2)}</h2>
+            // === MAIN RENDER AREA ===
+            return (
+                <div className={`${theme.bg} min-h-screen transition-colors duration-300 font-sans`}>
+                    
+                    {currentScreen === 'splash' && (
+                        <div className="min-h-screen flex flex-col items-center justify-center relative overflow-hidden">
+                            <div className="absolute top-10 w-full"><HeaderWord /></div>
+                            <div className={`border-2 border-indigo-500/30 p-10 rounded-full shadow-[0_0_80px_rgba(99,102,241,0.2)] flex flex-col items-center justify-center w-72 h-72 ${theme.glass} relative z-10`}>
+                                <div className="absolute inset-0 rounded-full border border-indigo-400/20 animate-ping opacity-20"></div>
+                                <h1 className="text-5xl font-black tracking-widest uppercase text-center font-serif bg-clip-text text-transparent bg-gradient-to-r from-violet-400 to-indigo-500">Mary</h1>
+                                <div className="h-px w-24 bg-indigo-500/50 my-4"></div>
+                                <h2 className={`text-sm tracking-widest uppercase text-center ${theme.textMuted} font-bold`}>Workshop<br/>System</h2>
                             </div>
                         </div>
+                    )}
 
-                        <div className="px-4">
-                            {pendingBills.length === 0 ? (
-                                <p className="text-center text-emerald-400 font-bold mt-10">No pending dues! Excellent.</p>
-                            ) : (
-                                pendingBills.map((bill, idx) => (
-                                    <div key={idx} className="glass-panel p-4 mb-3 rounded-2xl flex flex-col gap-3">
-                                        <div className="flex justify-between items-start">
-                                            <div>
-                                                <h3 className="font-bold text-white text-lg">{bill.customerName}</h3>
-                                                <p className="text-sm text-slate-400">{bill.vehicleModel}</p>
-                                            </div>
-                                            <div className="text-right">
-                                                <p className="font-black text-pink-400 text-xl">₹{bill.balanceDue}</p>
-                                                <p className="text-xs text-slate-500">Total: ₹{bill.grandTotal}</p>
-                                            </div>
-                                        </div>
-                                        <button 
-                                            onClick={() => { setPayModalBill(bill); setModalPayAmount(bill.balanceDue); setModalPayMethod('Cash'); }}
-                                            className="w-full bg-slate-800 text-cyan-400 font-bold py-3 rounded-xl border border-cyan-500/30 active:scale-95 transition-transform hover:bg-slate-700">
-                                            Collect Payment
-                                        </button>
+                    {currentScreen === 'dashboard' && (
+                        <div className="pb-28 max-w-md mx-auto relative">
+                            <div className={`sticky top-0 z-30 ${theme.glass} border-b p-4 pt-2 rounded-b-3xl mb-6`}>
+                                <HeaderWord />
+                                <div className="flex justify-between items-center mt-2">
+                                    <div>
+                                        <h1 className="text-2xl font-black tracking-wide text-transparent bg-clip-text bg-gradient-to-r from-violet-500 to-indigo-500">Mary Workshop</h1>
+                                        <p className={`text-sm font-bold ${theme.textMuted} mt-1 flex items-center gap-2`}>
+                                            <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span> Online
+                                        </p>
                                     </div>
-                                ))
-                            )}
-                        </div>
-
-                        {/* Premium Dark Modal */}
-                        {payModalBill && (
-                            <div className="fixed inset-0 bg-slate-900/90 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-                                <div className="glass-panel border border-cyan-500/30 rounded-3xl p-6 w-full max-w-sm shadow-2xl relative">
-                                    <button onClick={() => setPayModalBill(null)} className="absolute top-4 right-4 w-8 h-8 bg-slate-800 rounded-full font-bold text-slate-400 hover:text-white">X</button>
-                                    
-                                    <h2 className="text-xl font-bold text-white mb-1">Receive Payment</h2>
-                                    <p className="text-sm text-slate-400 mb-6">{payModalBill.customerName} - {payModalBill.vehicleModel}</p>
-                                    
-                                    <div className="flex gap-2 mb-5 p-1 bg-slate-900 rounded-xl">
-                                        <button onClick={() => setModalPayMethod('Cash')} className={`w-1/2 py-2 rounded-lg font-bold transition-colors ${modalPayMethod === 'Cash' ? 'bg-cyan-500 text-slate-900' : 'text-slate-400'}`}>Cash</button>
-                                        <button onClick={() => setModalPayMethod('QR')} className={`w-1/2 py-2 rounded-lg font-bold transition-colors ${modalPayMethod === 'QR' ? 'bg-cyan-500 text-slate-900' : 'text-slate-400'}`}>QR Scan</button>
-                                    </div>
-
-                                    <div className="mb-6">
-                                        <label className="text-xs font-bold text-cyan-400 uppercase tracking-wider mb-2 block">Amount Receiving (₹)</label>
-                                        <input type="number" className="bg-slate-900 border border-slate-700 p-4 rounded-xl w-full text-2xl font-black text-center text-white outline-none glow-input" value={modalPayAmount} onChange={(e) => setModalPayAmount(e.target.value)} />
-                                    </div>
-
-                                    {modalPayMethod === 'QR' && modalPayAmount > 0 && (
-                                        <div className="bg-white p-4 rounded-xl flex flex-col items-center justify-center mb-6">
-                                            <div className="w-32 h-32 flex items-center justify-center mb-2 overflow-hidden">
-                                                <img src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(`upi://pay?pa=${upiID}&pn=${encodeURIComponent(shopName)}&am=${modalPayAmount}&cu=INR`)}`} alt="QR" crossOrigin="anonymous" className="w-full h-full" />
-                                            </div>
-                                            <p className="text-slate-800 text-xs font-bold">Ask customer to scan</p>
-                                        </div>
-                                    )}
-
-                                    <button onClick={handleConfirmPayment} disabled={isSubmitting} className={`w-full text-white text-lg font-bold py-4 rounded-xl glow-button transition-transform ${isSubmitting ? 'bg-slate-600' : 'bg-gradient-to-r from-cyan-500 to-blue-500'} active:scale-95`}>
-                                        {isSubmitting ? 'Updating...' : 'Confirm Payment'}
+                                    <button onClick={() => setIsDarkMode(!isDarkMode)} className={`w-10 h-10 rounded-full flex items-center justify-center ${theme.card} text-xl shadow-md`}>
+                                        {isDarkMode ? '☀️' : '🌙'}
                                     </button>
                                 </div>
                             </div>
-                        )}
-                        <BottomNav />
-                    </div>
-                );
-            }
-
-            if (currentScreen === 'newBill') {
-                return (
-                    <div className="min-h-screen pb-24 max-w-md mx-auto p-4">
-                        <div className="flex items-center gap-4 mb-6">
-                            <button onClick={() => navigateTo('dashboard')} className="w-10 h-10 glass-panel rounded-full flex items-center justify-center font-bold text-cyan-400 active:scale-95">{"<"}</button>
-                            <h1 className="text-xl font-bold text-white">{editingBillId ? 'Edit Bill' : 'New Bill'}</h1>
+                            <div className="px-4">
+                                <h2 className={`text-sm font-bold ${theme.textMuted} uppercase tracking-wider mb-4 ml-2`}>Recent Bills</h2>
+                                {isLoadingBills ? (
+                                    <div className="text-center text-indigo-500 mt-10 animate-pulse font-bold text-lg">Syncing database...</div>
+                                ) : (
+                                    <div>{allBills.length === 0 ? <p className={`text-center mt-10 ${theme.textMuted} text-lg`}>No records found.</p> : allBills.map((bill, idx) => <BillListItem key={idx} bill={bill} />)}</div>
+                                )}
+                            </div>
+                            <Fab />
+                            <BottomNav />
                         </div>
-                        
-                        {/* Form inputs strictly styled for dark mode */}
-                        <div className="glass-panel p-5 rounded-3xl mb-6">
-                            <h2 className="text-xs font-bold text-cyan-400 uppercase tracking-wider mb-4">Customer Info</h2>
-                            <div className="flex flex-col gap-4">
-                                <input type="text" placeholder="Customer Name (Required)" className="w-full bg-slate-900 border border-slate-700 text-white rounded-xl p-4 outline-none glow-input placeholder-slate-500" value={customerName} onChange={(e) => setCustomerName(e.target.value)} />
-                                <input type="tel" placeholder="Phone No." className="w-full bg-slate-900 border border-slate-700 text-white rounded-xl p-4 outline-none glow-input placeholder-slate-500" value={phone} onChange={(e) => setPhone(e.target.value)} />
-                                <div className="flex gap-3">
-                                    <input type="text" placeholder="Bike Model" className="w-1/2 bg-slate-900 border border-slate-700 text-white rounded-xl p-4 outline-none glow-input placeholder-slate-500" value={vehicleModel} onChange={(e) => setVehicleModel(e.target.value)} />
-                                    <input type="text" placeholder="Number" className="w-1/2 bg-slate-900 border border-slate-700 text-white rounded-xl p-4 outline-none glow-input placeholder-slate-500" value={vehicleNo} onChange={(e) => setVehicleNo(e.target.value)} />
+                    )}
+
+                    {currentScreen === 'search' && (
+                        <div className="pb-28 max-w-md mx-auto">
+                            <div className={`sticky top-0 z-30 ${theme.glass} border-b p-4 pt-2 rounded-b-3xl mb-6`}>
+                                <HeaderWord />
+                                <input 
+                                    type="text" 
+                                    placeholder="Search Name, Bike, or Phone..." 
+                                    className={`w-full mt-3 ${theme.input} border rounded-2xl p-4 outline-none glow-input transition-all font-bold text-lg`}
+                                    value={searchQuery}
+                                    onChange={(e) => setSearchQuery(e.target.value)}
+                                />
+                            </div>
+                            <div className="px-4">
+                                {isLoadingBills ? <div className="text-center text-indigo-500 mt-10 animate-pulse text-lg font-bold">Syncing...</div> : (
+                                    filteredBills.map((bill, idx) => <BillListItem key={idx} bill={bill} />)
+                                )}
+                            </div>
+                            <Fab />
+                            <BottomNav />
+                        </div>
+                    )}
+
+                    {currentScreen === 'pending' && (
+                        <div className="pb-28 max-w-md mx-auto relative">
+                            <div className={`sticky top-0 z-30 ${theme.glass} border-b p-4 pt-2 rounded-b-3xl mb-6`}>
+                                <HeaderWord />
+                                <h1 className={`text-2xl font-black ${theme.text} mb-3 mt-2`}>Pending Dues</h1>
+                                <div className="bg-gradient-to-r from-pink-600 to-rose-600 p-6 rounded-2xl shadow-lg">
+                                    <p className="text-sm font-bold text-pink-200 mb-1 uppercase tracking-wider">Total Outstanding</p>
+                                    <h2 className="text-4xl font-black text-white">₹{totalPendingAmount.toFixed(2)}</h2>
                                 </div>
                             </div>
-                        </div>
-
-                        <div className="glass-panel p-5 rounded-3xl mb-6">
-                            <h2 className="text-xs font-bold text-cyan-400 uppercase tracking-wider mb-4">Spares & Services</h2>
-                            <div className="flex gap-2 mb-4">
-                                <input type="text" placeholder="Item name..." className="w-2/3 bg-slate-900 border border-slate-700 text-white rounded-xl p-4 outline-none glow-input placeholder-slate-500" value={selectedItem} onChange={(e) => setSelectedItem(e.target.value)} />
-                                <input type="number" placeholder="₹ Price" className="w-1/3 bg-slate-900 border border-slate-700 text-white rounded-xl p-4 outline-none glow-input placeholder-slate-500" value={itemPrice} onChange={(e) => setItemPrice(e.target.value)} />
-                            </div>
-                            <button onClick={handleAddItem} className="w-full bg-slate-800 text-cyan-400 font-bold py-3 rounded-xl border border-cyan-500/30 active:scale-95 transition-transform">Add to Bill</button>
-                            
-                            <div className="mt-4">
-                                {items.map((item, index) => (
-                                    <div key={index} className="flex justify-between border-b border-slate-700/50 py-3 text-sm text-slate-300">
-                                        <span>{item.name}</span>
-                                        <div className="flex items-center gap-4">
-                                            <span className="font-bold text-white">₹{item.price}</span>
-                                            <button onClick={() => setItems(items.filter((_, i) => i !== index))} className="text-pink-500 font-bold text-lg">×</button>
+                            <div className="px-4">
+                                {pendingBills.length === 0 ? (
+                                    <p className="text-center text-emerald-500 font-bold text-xl mt-10">No pending dues! Excellent.</p>
+                                ) : (
+                                    pendingBills.map((bill, idx) => (
+                                        <div key={idx} className={`${theme.card} p-5 mb-4 rounded-2xl flex flex-col gap-3 border-l-4 border-l-pink-500`}>
+                                            <div className="flex justify-between items-start">
+                                                <div>
+                                                    <h3 className={`font-bold ${theme.text} text-xl`}>{bill.customerName}</h3>
+                                                    <p className={`text-base ${theme.textMuted} font-medium`}>{bill.vehicleModel}</p>
+                                                </div>
+                                                <div className="text-right">
+                                                    <p className="font-black text-pink-500 text-2xl">₹{bill.balanceDue}</p>
+                                                    <p className={`text-sm ${theme.textMuted} font-bold`}>Total: ₹{bill.grandTotal}</p>
+                                                </div>
+                                            </div>
+                                            <button 
+                                                onClick={() => { setPayModalBill(bill); setModalPayAmount(bill.balanceDue); setModalPayMethod('Cash'); }}
+                                                className={`w-full ${isDarkMode ? 'bg-slate-900 text-indigo-400' : 'bg-indigo-50 text-indigo-700'} font-bold text-lg py-4 rounded-xl border border-indigo-500/30 active:scale-95 transition-transform`}>
+                                                Collect Payment
+                                            </button>
                                         </div>
-                                    </div>
-                                ))}
+                                    ))
+                                )}
                             </div>
-                        </div>
 
-                        <div className="glass-panel p-5 rounded-3xl mb-6">
-                            <h2 className="text-xs font-bold text-cyan-400 uppercase tracking-wider mb-4">Totals & Payment</h2>
-                            <div className="flex justify-between items-center mb-4 border-b border-slate-700/50 pb-4">
-                                <span className="text-slate-300 font-medium">Labor (Cooli) ₹</span>
-                                <input type="number" placeholder="0" className="w-1/2 bg-slate-900 border border-slate-700 text-white rounded-xl p-3 text-right outline-none glow-input" value={cooli} onChange={(e) => setCooli(e.target.value)} />
-                            </div>
-                            
-                            <div className="flex justify-between items-center mb-4">
-                                <span className="text-lg font-bold text-white">Grand Total</span>
-                                <span className="text-2xl font-black text-cyan-400">₹{grandTotal}</span>
-                            </div>
-                            
-                            <div className="flex justify-between items-center bg-slate-900 p-3 rounded-xl border border-slate-700">
-                                <span className="font-medium text-slate-400">Advance Paid ₹</span>
-                                <input type="number" placeholder="0" className="w-1/2 bg-transparent text-white text-right outline-none font-bold" value={advancePaid} onChange={(e) => setAdvancePaid(e.target.value)} />
-                            </div>
-                            {balanceDue > 0 && (
-                                <div className="flex justify-between items-center mt-3 pt-3 text-pink-400 font-bold">
-                                    <span>Balance Pending</span><span>₹{balanceDue}</span>
+                            {payModalBill && (
+                                <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+                                    <div className={`${theme.glass} border border-indigo-500/30 rounded-3xl p-6 w-full max-w-sm shadow-2xl relative`}>
+                                        <button onClick={() => setPayModalBill(null)} className={`absolute top-4 right-4 w-10 h-10 ${theme.input} rounded-full font-bold text-xl`}>X</button>
+                                        <h2 className={`text-2xl font-black ${theme.text} mb-2`}>Receive Payment</h2>
+                                        <p className={`text-base ${theme.textMuted} mb-6 font-bold`}>{payModalBill.customerName} - {payModalBill.vehicleModel}</p>
+                                        
+                                        <div className={`flex gap-2 mb-6 p-2 ${theme.input} rounded-2xl`}>
+                                            <button onClick={() => setModalPayMethod('Cash')} className={`w-1/2 py-3 text-lg rounded-xl font-bold transition-colors ${modalPayMethod === 'Cash' ? theme.primaryGradient + ' text-white shadow-md' : theme.textMuted}`}>Cash</button>
+                                            <button onClick={() => setModalPayMethod('QR')} className={`w-1/2 py-3 text-lg rounded-xl font-bold transition-colors ${modalPayMethod === 'QR' ? theme.primaryGradient + ' text-white shadow-md' : theme.textMuted}`}>QR Scan</button>
+                                        </div>
+
+                                        <div className="mb-6">
+                                            <label className={`text-sm font-bold text-indigo-500 uppercase tracking-wider mb-2 block`}>Amount Receiving (₹)</label>
+                                            <input type="number" className={`w-full ${theme.input} border-2 border-indigo-500 p-5 rounded-2xl text-3xl font-black text-center outline-none glow-input`} value={modalPayAmount} onChange={(e) => setModalPayAmount(e.target.value)} />
+                                        </div>
+
+                                        {modalPayMethod === 'QR' && modalPayAmount > 0 && (
+                                            <div className="bg-white p-4 rounded-2xl flex flex-col items-center justify-center mb-6">
+                                                <div className="w-40 h-40 flex items-center justify-center mb-3">
+                                                    <img src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(`upi://pay?pa=${upiID}&pn=${encodeURIComponent(shopName)}&am=${modalPayAmount}&cu=INR`)}`} alt="QR" crossOrigin="anonymous" className="w-full h-full" />
+                                                </div>
+                                                <p className="text-slate-800 text-sm font-bold">Ask customer to scan</p>
+                                            </div>
+                                        )}
+
+                                        <button onClick={handleConfirmPayment} disabled={isSubmitting} className={`w-full text-white text-xl font-bold py-5 rounded-2xl glow-button transition-transform ${isSubmitting ? 'bg-slate-600' : theme.primaryGradient} active:scale-95`}>
+                                            {isSubmitting ? 'Updating...' : 'Confirm Payment'}
+                                        </button>
+                                    </div>
                                 </div>
                             )}
+                            <BottomNav />
                         </div>
+                    )}
 
-                        <button onClick={handleSubmitBill} disabled={isSubmitting} className={`w-full text-white text-lg font-bold py-4 rounded-xl glow-button transition-transform ${isSubmitting ? 'bg-slate-600' : 'bg-gradient-to-r from-violet-600 to-indigo-600'} active:scale-95`}>
-                            {isSubmitting ? 'Saving...' : (editingBillId ? 'Update Bill' : 'Generate Bill')}
-                        </button>
-                    </div>
-                );
-            }
+                    {currentScreen === 'newBill' && (
+                        <div className="pb-24 max-w-md mx-auto p-4">
+                            <div className="flex items-center gap-4 mb-6 mt-2">
+                                <button onClick={() => navigateTo('dashboard')} className={`w-12 h-12 ${theme.card} rounded-full flex items-center justify-center font-bold text-indigo-500 text-xl shadow-md active:scale-95`}>{"<"}</button>
+                                <h1 className={`text-2xl font-black ${theme.text}`}>{editingBillId ? 'Edit Bill' : 'New Bill'}</h1>
+                            </div>
+                            
+                            <div className={`${theme.card} p-6 rounded-3xl mb-6`}>
+                                <h2 className="text-sm font-bold text-indigo-500 uppercase tracking-wider mb-5">Customer Info</h2>
+                                <div className="flex flex-col gap-4">
+                                    <input type="text" placeholder="Customer Name (Required)" className={`w-full ${theme.input} rounded-xl p-4 text-lg font-bold outline-none glow-input border-l-4 border-l-indigo-500`} value={customerName} onChange={(e) => setCustomerName(e.target.value)} />
+                                    <input type="tel" placeholder="Phone No." className={`w-full ${theme.input} rounded-xl p-4 text-lg font-bold outline-none glow-input`} value={phone} onChange={(e) => setPhone(e.target.value)} />
+                                    <div className="flex gap-3">
+                                        <input type="text" placeholder="Bike Model" className={`w-1/2 ${theme.input} rounded-xl p-4 text-lg font-bold outline-none glow-input border-l-4 border-l-indigo-500`} value={vehicleModel} onChange={(e) => setVehicleModel(e.target.value)} />
+                                        <input type="text" placeholder="Number" className={`w-1/2 ${theme.input} rounded-xl p-4 text-lg font-bold outline-none glow-input`} value={vehicleNo} onChange={(e) => setVehicleNo(e.target.value)} />
+                                    </div>
+                                </div>
+                            </div>
 
-            if (currentScreen === 'receipt') {
-                return (
-                    <div className="min-h-screen p-4 pb-24 max-w-md mx-auto">
-                        <div className="flex items-center gap-4 mb-6">
-                            <button onClick={() => navigateTo('dashboard')} className="w-10 h-10 glass-panel rounded-full flex items-center justify-center font-bold text-cyan-400 active:scale-95">{"<"}</button>
-                            <h1 className="text-xl font-bold text-white">Digital Receipt</h1>
-                        </div>
-
-                        {/* RECEIPT REMAINS STRICTLY LIGHT MODE FOR CLEAN SCREENSHOTS */}
-                        <div id="receipt-capture" className="bg-white rounded-2xl overflow-hidden shadow-2xl relative">
-                            {editingBillId && (
-                                <div className="absolute top-2 right-2 bg-yellow-400 text-yellow-900 text-[10px] font-bold px-2 py-1 rounded-full z-10">UPDATED</div>
-                            )}
-                            <div className="bg-gradient-to-r from-blue-700 to-indigo-800 p-6 text-center text-white">
-                                <h1 className="text-2xl font-black tracking-wider uppercase">Mary Two Wheelar</h1>
-                                <p className="text-sm font-medium tracking-widest uppercase opacity-90 mt-1 mb-3">Workshop</p>
-                                <p className="text-xs opacity-80 mb-1">Srivilliputtur</p>
-                                <p className="text-xs opacity-80">Ph: +91 9876543210</p> 
-                                <div className="mt-4 p-2 bg-black/20 rounded text-xs italic font-serif">{dailyVerse}</div>
-                            </div>
-                            <div className="p-5 border-b border-dashed border-gray-300 bg-gray-50 text-sm">
-                                <p className="text-gray-500 mb-1">Name: <span className="text-gray-900 font-bold">{customerName || 'Unknown'}</span></p>
-                                <p className="text-gray-500 mb-1">Vehicle: <span className="text-gray-900 font-bold">{vehicleModel || 'Unknown'} {vehicleNo ? `- ${vehicleNo}` : ''}</span></p>
-                                <p className="text-gray-500">Date: <span className="text-gray-900 font-bold">{new Date(billDate).toLocaleDateString()}</span></p>
-                            </div>
-                            <div className="p-5">
-                                {items.map((item, index) => (
-                                    <div key={index} className="flex justify-between text-sm text-gray-800 mb-2">
-                                        <span>{item.name}</span><span className="font-medium">₹{item.price.toFixed(2)}</span>
-                                    </div>
-                                ))}
-                                {cooli && (
-                                    <div className="flex justify-between text-sm text-gray-800 mb-2 mt-4 pt-4 border-t border-gray-100">
-                                        <span>Cooli (Labor)</span><span className="font-medium">₹{parseFloat(cooli).toFixed(2)}</span>
-                                    </div>
-                                )}
-                            </div>
-                            <div className="bg-slate-900 p-5 text-white">
-                                <div className="flex justify-between text-lg font-bold mb-2"><span>Grand Total</span><span>₹{grandTotal.toFixed(2)}</span></div>
-                                <div className="flex justify-between text-sm text-slate-400 mb-2"><span>Advance / Paid</span><span className="text-emerald-400">₹{currentAdvance.toFixed(2)}</span></div>
-                                {balanceDue > 0 && (
-                                    <div className="flex justify-between text-xl font-black mt-3 pt-3 border-t border-slate-700 text-pink-500">
-                                        <span>Balance Due</span><span>₹{balanceDue.toFixed(2)}</span>
-                                    </div>
-                                )}
-                                {balanceDue > 0 && (
-                                    <div className="bg-white mt-5 p-3 rounded-lg flex flex-col items-center justify-center text-center">
-                                        <div className="w-28 h-28 bg-white flex items-center justify-center mb-2 overflow-hidden rounded-lg">
-                                            <img src={qrUrl} alt="Scan to Pay" crossOrigin="anonymous" className="w-full h-full object-cover" />
+                            <div className={`${theme.card} p-6 rounded-3xl mb-6`}>
+                                <h2 className="text-sm font-bold text-indigo-500 uppercase tracking-wider mb-5">Spares & Services</h2>
+                                <div className="flex gap-2 mb-5">
+                                    <input type="text" placeholder="Item name..." className={`w-2/3 ${theme.input} rounded-xl p-4 text-lg font-bold outline-none glow-input`} value={selectedItem} onChange={(e) => setSelectedItem(e.target.value)} />
+                                    <input type="number" placeholder="₹ Price" className={`w-1/3 ${theme.input} rounded-xl p-4 text-lg font-bold outline-none glow-input`} value={itemPrice} onChange={(e) => setItemPrice(e.target.value)} />
+                                </div>
+                                <button onClick={handleAddItem} className={`w-full ${isDarkMode ? 'bg-slate-900 text-indigo-400' : 'bg-indigo-50 text-indigo-700'} font-black text-lg py-4 rounded-xl border border-indigo-500/30 active:scale-95 transition-transform`}>Add to Bill</button>
+                                
+                                <div className="mt-5">
+                                    {items.map((item, index) => (
+                                        <div key={index} className={`flex justify-between border-b ${isDarkMode ? 'border-slate-700' : 'border-slate-200'} py-4 text-base ${theme.textMuted} font-bold`}>
+                                            <span>{item.name}</span>
+                                            <div className="flex items-center gap-4">
+                                                <span className={`${theme.text} text-lg`}>₹{item.price}</span>
+                                                <button onClick={() => setItems(items.filter((_, i) => i !== index))} className="text-pink-500 text-2xl px-2">×</button>
+                                            </div>
                                         </div>
-                                        <p className="text-slate-800 text-[11px] font-bold">Scan to pay balance: ₹{balanceDue}</p>
+                                    ))}
+                                </div>
+                            </div>
+
+                            <div className={`${theme.card} p-6 rounded-3xl mb-6`}>
+                                <h2 className="text-sm font-bold text-indigo-500 uppercase tracking-wider mb-5">Totals & Payment</h2>
+                                <div className={`flex justify-between items-center mb-5 border-b ${isDarkMode ? 'border-slate-700' : 'border-slate-200'} pb-5`}>
+                                    <span className={`${theme.textMuted} font-bold text-lg`}>Labor (Cooli) ₹</span>
+                                    <input type="number" placeholder="0" className={`w-1/2 ${theme.input} rounded-xl p-4 text-xl font-black text-right outline-none glow-input`} value={cooli} onChange={(e) => setCooli(e.target.value)} />
+                                </div>
+                                
+                                <div className="flex justify-between items-center mb-5">
+                                    <span className={`text-xl font-black ${theme.text}`}>Grand Total</span>
+                                    <span className="text-3xl font-black text-indigo-500">₹{grandTotal}</span>
+                                </div>
+                                
+                                <div className={`flex justify-between items-center ${theme.input} p-4 rounded-2xl`}>
+                                    <span className={`font-bold ${theme.textMuted} text-lg`}>Advance ₹</span>
+                                    <input type="number" placeholder="0" className="w-1/2 bg-transparent text-emerald-500 text-2xl text-right outline-none font-black" value={advancePaid} onChange={(e) => setAdvancePaid(e.target.value)} />
+                                </div>
+                                {balanceDue > 0 && (
+                                    <div className="flex justify-between items-center mt-4 pt-4 text-pink-500 font-black text-xl border-t border-pink-500/20">
+                                        <span>Balance Due</span><span>₹{balanceDue}</span>
                                     </div>
                                 )}
                             </div>
-                            <div className="bg-white p-4 text-center"><p className="text-gray-500 font-medium text-sm">நன்றி! மீண்டும் வருக!</p></div>
-                        </div>
 
-                        <div className="mt-6 flex gap-3">
-                            {editingBillId && (
-                                <button onClick={() => navigateTo('search')} className="w-1/3 glass-panel text-white font-bold py-4 rounded-xl active:scale-95 transition-transform">Back</button>
-                            )}
-                            <button onClick={handleShare} className="flex-1 bg-gradient-to-r from-emerald-400 to-emerald-500 text-slate-900 font-bold py-4 rounded-xl glow-button active:scale-95 transition-transform">
-                                Share to WhatsApp
+                            <button onClick={handleSubmitBill} disabled={isSubmitting} className={`w-full text-white text-xl font-black py-5 rounded-2xl glow-button transition-transform ${isSubmitting ? 'bg-slate-600' : theme.primaryGradient} active:scale-95 shadow-xl`}>
+                                {isSubmitting ? 'Saving...' : (editingBillId ? 'Update Bill' : 'Generate Bill')}
                             </button>
                         </div>
-                    </div>
-                );
-            }
+                    )}
 
-            return null;
+                    {currentScreen === 'receipt' && (
+                        <div className="p-4 pb-24 max-w-md mx-auto">
+                            <div className="flex items-center gap-4 mb-6 mt-2">
+                                <button onClick={() => navigateTo('dashboard')} className={`w-12 h-12 ${theme.card} rounded-full flex items-center justify-center font-bold text-indigo-500 text-xl shadow-md active:scale-95`}>{"<"}</button>
+                                <h1 className={`text-2xl font-black ${theme.text}`}>Digital Receipt</h1>
+                            </div>
+
+                            {/* RECEIPT IS ALWAYS LIGHT MODE FOR A CLEAN PRINT/SHARE LOOK */}
+                            <div id="receipt-capture" className="bg-white rounded-3xl overflow-hidden shadow-2xl relative text-slate-900 border border-slate-200">
+                                {editingBillId && (
+                                    <div className="absolute top-3 right-3 bg-yellow-400 text-yellow-900 text-xs font-black px-3 py-1 rounded-full z-10 shadow-sm">UPDATED</div>
+                                )}
+                                
+                                {/* Very Top Glorious Text */}
+                                <div className="bg-white text-center pt-3 pb-2">
+                                    <span className="font-serif italic font-extrabold text-xl text-yellow-600">தேவனுக்கே மகிமை</span>
+                                </div>
+
+                                <div className="bg-gradient-to-r from-violet-600 to-indigo-700 p-6 text-center text-white rounded-t-3xl shadow-inner">
+                                    <h1 className="text-3xl font-black tracking-wider uppercase mb-1">Mary</h1>
+                                    <p className="text-lg font-bold tracking-widest uppercase opacity-90 mb-3">Two Wheelar Workshop</p>
+                                    <p className="text-sm opacity-90 font-medium">Srivilliputtur</p>
+                                    <p className="text-sm font-bold opacity-90">Ph: +91 9876543210</p> 
+                                    
+                                    {/* MOCKUP FOR YOUR BIBLE.JS DATA */}
+                                    <div className="mt-5 p-4 bg-black/20 rounded-2xl shadow-sm border border-white/10">
+                                        <p className="text-base font-bold mb-2 leading-relaxed">{dailyVerseTamil}</p>
+                                        <p className="text-xs italic font-serif opacity-80">{dailyVerseEnglish}</p>
+                                    </div>
+                                </div>
+
+                                <div className="p-6 border-b-2 border-dashed border-slate-200 bg-slate-50 text-base">
+                                    <p className="text-slate-500 mb-2 font-medium">Name: <span className="text-slate-900 font-bold ml-2 text-lg">{customerName || 'Unknown'}</span></p>
+                                    <p className="text-slate-500 mb-2 font-medium">Vehicle: <span className="text-slate-900 font-bold ml-2 text-lg">{vehicleModel || 'Unknown'} {vehicleNo ? `- ${vehicleNo}` : ''}</span></p>
+                                    <p className="text-slate-500 font-medium">Date: <span className="text-slate-900 font-bold ml-2 text-lg">{new Date(billDate).toLocaleDateString()}</span></p>
+                                </div>
+
+                                <div className="p-6">
+                                    {items.map((item, index) => (
+                                        <div key={index} className="flex justify-between text-base text-slate-800 mb-3 font-bold">
+                                            <span>{item.name}</span><span className="text-lg">₹{item.price.toFixed(2)}</span>
+                                        </div>
+                                    ))}
+                                    {cooli && (
+                                        <div className="flex justify-between text-base text-slate-800 mb-3 mt-5 pt-5 border-t-2 border-slate-100 font-bold">
+                                            <span>Cooli (Labor)</span><span className="text-lg">₹{parseFloat(cooli).toFixed(2)}</span>
+                                        </div>
+                                    )}
+                                </div>
+
+                                <div className="bg-slate-900 p-6 text-white">
+                                    <div className="flex justify-between text-xl font-black mb-3"><span>Grand Total</span><span>₹{grandTotal.toFixed(2)}</span></div>
+                                    <div className="flex justify-between text-base font-bold text-slate-400 mb-2"><span>Advance / Paid</span><span className="text-emerald-400">₹{currentAdvance.toFixed(2)}</span></div>
+                                    
+                                    {balanceDue > 0 && (
+                                        <div className="flex justify-between text-2xl font-black mt-4 pt-4 border-t border-slate-700 text-pink-500">
+                                            <span>Balance Due</span><span>₹{balanceDue.toFixed(2)}</span>
+                                        </div>
+                                    )}
+                                    
+                                    {balanceDue > 0 && (
+                                        <div className="bg-white mt-6 p-4 rounded-2xl flex flex-col items-center justify-center text-center shadow-inner">
+                                            <div className="w-36 h-36 bg-white flex items-center justify-center mb-3">
+                                                <img src={qrUrl} alt="Scan to Pay" crossOrigin="anonymous" className="w-full h-full object-cover" />
+                                            </div>
+                                            <p className="text-slate-800 text-sm font-black">Scan to pay balance: ₹{balanceDue}</p>
+                                        </div>
+                                    )}
+                                </div>
+                                <div className="bg-slate-50 p-5 text-center"><p className="text-slate-600 font-bold text-base">நன்றி! மீண்டும் வருக!</p></div>
+                            </div>
+
+                            <div className="mt-8 flex gap-4">
+                                {editingBillId && (
+                                    <button onClick={() => navigateTo('search')} className={`w-1/3 ${theme.card} ${theme.text} font-bold text-lg py-5 rounded-2xl active:scale-95 transition-transform shadow-lg`}>Back</button>
+                                )}
+                                <button onClick={handleShare} className="flex-1 bg-gradient-to-r from-emerald-400 to-emerald-500 text-slate-900 font-black text-xl py-5 rounded-2xl glow-button active:scale-95 transition-transform shadow-xl">
+                                    Share Bill
+                                </button>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            );
         }
 
         const root = ReactDOM.createRoot(document.getElementById('root'));
