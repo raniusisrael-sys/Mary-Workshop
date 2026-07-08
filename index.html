@@ -89,11 +89,9 @@
         // Connected to your exact Google Script URL
         const GOOGLE_SHEETS_URL = "https://script.google.com/macros/s/AKfycbyOzAZoSlxeTHk0A2uEM8Ehsc8aKSgDeSd3eNvi1r7ylDkYHLVH144PdeHH1hkw0i0/exec"; 
 
-        // 🌟 PRE-LOAD AUDIO TO BYPASS MOBILE AUTOPLAY BLOCKS 🌟
-        const audioClick = new Audio('https://assets.mixkit.co/active_storage/sfx/2568/2568-preview.mp3');
-        const audioSuccess = new Audio('https://assets.mixkit.co/active_storage/sfx/1435/1435-preview.mp3');
-        // Using a longer revving sound that perfectly spans the splash screen!
-        const audioBike = new Audio('https://assets.mixkit.co/active_storage/sfx/1626/1626-preview.mp3');
+        // 🌟 AUDIO MANAGER (Loud Bike Sound Removed - Only Soft Clicks & Success Chimes) 🌟
+        const audioClick = new Audio('https://actions.google.com/sounds/v1/cartoon/pop.ogg');
+        const audioSuccess = new Audio('https://actions.google.com/sounds/v1/cartoon/magic_chime.ogg');
 
         const playSound = (type) => {
             try {
@@ -105,10 +103,6 @@
                     audioSuccess.currentTime = 0;
                     audioSuccess.volume = 1.0;
                     audioSuccess.play().catch(e => console.log(e));
-                } else if (type === 'bike') {
-                    audioBike.currentTime = 0;
-                    audioBike.volume = 1.0;
-                    audioBike.play().catch(e => console.log(e));
                 }
             } catch(e) {}
         };
@@ -203,10 +197,9 @@
                 }
             };
 
-            // 🌟 FIXED SPLASH ENGINE 🌟
+            // 🌟 SILENT SPLASH ENGINE 🌟
             const startEngineAndApp = () => {
-                // Audio plays IMMEDIATELY to bypass mobile browser blocks
-                playSound('bike'); 
+                playSound('click'); // Only plays the soft click
                 loadRandomVerse();
                 setCurrentScreen('splash');
                 
@@ -331,19 +324,16 @@
                 setIsSubmitting(false);
             };
 
-            // 🌟 FIXED SHARE FUNCTION (NO EXTRA PADDING, ADDS REVIEW LINK TO TEXT) 🌟
             const handleShare = async () => {
                 playSound('click');
                 const receiptElement = document.getElementById('receipt-capture');
                 if (!receiptElement) return;
                 try {
-                    // Added background color and exact rendering config for html2canvas
                     const canvas = await html2canvas(receiptElement, { scale: 2, useCORS: true, allowTaint: true, backgroundColor: "#ffffff" });
                     canvas.toBlob(async (blob) => {
                         const fileName = customerName ? `Mary_Workshop_Bill_${customerName}.png` : `Workshop_Bill.png`;
                         const file = new File([blob], fileName, { type: "image/png" });
                         
-                        // WhatsApp Shared Text with clickable link
                         const shareMessage = `மேரி டூவீலர் ஒர்க்ஸ் (Mary Two Wheelar Workshop)\n\nநன்றி! மீண்டும் வருக!\n\nஎங்கள் சேவைகளை Google-ல் மதிப்பிடவும் ⭐⭐⭐⭐⭐:\n${googleReviewLink}`;
 
                         if (navigator.canShare && navigator.canShare({ files: [file] })) {
@@ -353,7 +343,6 @@
                                 files: [file] 
                             });
                         } else {
-                            // Fallback for browsers that don't support file sharing
                             const link = document.createElement('a'); link.download = fileName; link.href = canvas.toDataURL(); link.click();
                             alert(`Bill image downloaded! Please manually share this Google Review link with the customer:\n${googleReviewLink}`);
                         }
@@ -693,13 +682,9 @@
                                 <h1 className={`text-2xl font-black ${theme.text}`}>Digital Receipt</h1>
                             </div>
 
-                            {/* 🌟 PERFECTED BOUNDS FOR CLEAN SCREENSHOT CAPTURE 🌟 */}
-                            <div id="receipt-capture" className="bg-white relative text-slate-900 shadow-none border-0 w-full max-w-md mx-auto">
+                            <div id="receipt-capture" className="bg-white relative text-slate-900 shadow-none border-0 w-full max-w-md mx-auto pb-4">
                                 
                                 <div className="bg-white text-center pt-5 pb-3 relative">
-                                    {editingBillId && (
-                                        <div className="absolute top-4 left-4 bg-yellow-400 text-yellow-900 text-[10px] font-black px-3 py-1 rounded-full z-10 shadow-sm">UPDATED</div>
-                                    )}
                                     <span className="font-serif italic font-extrabold text-xl text-yellow-600">தேவனுக்கே மகிமை</span>
                                 </div>
 
@@ -735,7 +720,7 @@
                                     )}
                                 </div>
 
-                                <div className="bg-slate-900 p-6 text-white">
+                                <div className="bg-slate-900 p-6 text-white rounded-b-3xl">
                                     <div className="flex justify-between text-xl font-black mb-3"><span>Grand Total</span><span>₹{grandTotal.toFixed(2)}</span></div>
                                     <div className="flex justify-between text-base font-bold text-slate-400 mb-2"><span>Advance / Paid</span><span className="text-emerald-400">₹{currentAdvance.toFixed(2)}</span></div>
                                     
@@ -753,9 +738,6 @@
                                             <p className="text-slate-800 text-sm font-black">Scan to pay balance: ₹{balanceDue}</p>
                                         </div>
                                     )}
-                                </div>
-                                <div className="bg-slate-50 p-6 text-center border-t-2 border-dashed border-slate-200">
-                                    <p className="text-slate-600 font-bold text-base m-0">நன்றி! மீண்டும் வருக!</p>
                                 </div>
                             </div>
 
