@@ -10,6 +10,8 @@
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     
+    <script src="./bible.js"></script>
+
     <style>
         ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-track { background: transparent; }
@@ -23,20 +25,24 @@
 
     <script type="text/babel">
         const { useState, useEffect } = React;
-        const GOOGLE_SHEETS_URL = "https://script.google.com/macros/s/AKfycbyOzAZoSlxeTHk0A2uEM8Ehsc8aKSgDeSd3eNvi1r7ylDkYHLVH144PdeHH1hkw0i0/exec";
+        
+        // Your exact Google Apps Script URL
+        const GOOGLE_SHEETS_URL = "https://script.google.com/macros/s/AKfycbyOzAZoSlxeTHk0A2uEM8Ehsc8aKSgDeSd3eNvi1r7ylDkYHLVH144PdeHH1hkw0i0/exec"; 
 
         function App() {
             // === CONFIG ===
-            const upiID = "weslyragland-1@okaxis"; // <-- PUT HIS REAL UPI ID HERE
+            const upiID = "weslyragland-1@okaxis"; // Your exact UPI ID
             const shopName = "Mary Two Wheelar Workshop";
             
-            // Temporary Dual-Language Bible Verse Mockup (Ready for your bible.js)
-            const dailyVerseTamil = '"கர்த்தர் என் மேய்ப்பராயிருக்கிறார்; நான் தாழ்ச்சியடையேன்."';
-            const dailyVerseEnglish = '"The Lord is my shepherd; I shall not want." - Psalm 23:1';
-
             // === STATE ===
-            const [isDarkMode, setIsDarkMode] = useState(true); // Day/Night Mode State
+            const [isDarkMode, setIsDarkMode] = useState(true); 
             const [currentScreen, setCurrentScreen] = useState('splash');
+            
+            // 🌟 PULLS THE DAILY VERSE FROM YOUR BIBLE.JS FILE 🌟
+            const fallbackVerse = { tamil: '"கர்த்தர் என் மேய்ப்பராயிருக்கிறார்; நான் தாழ்ச்சியடையேன்."', text: '"The Lord is my shepherd; I shall not want."', ref: "Psalm 23:1" };
+            const [currentVerse, setCurrentVerse] = useState(() => {
+                return typeof getCalculatedDailyVerseObject === 'function' ? getCalculatedDailyVerseObject() : fallbackVerse;
+            });
             
             // Form States
             const [customerName, setCustomerName] = useState('');
@@ -107,6 +113,14 @@
                 setCurrentScreen(screenName);
             };
 
+            // 🌟 PICKS A BRAND NEW RANDOM VERSE FROM BIBLE.JS ON GENERATE 🌟
+            const loadRandomVerse = () => {
+                if (typeof BIBLE_VERSES_VAULT !== 'undefined' && BIBLE_VERSES_VAULT.length > 0) {
+                    const randomIndex = Math.floor(Math.random() * BIBLE_VERSES_VAULT.length);
+                    setCurrentVerse(BIBLE_VERSES_VAULT[randomIndex]);
+                }
+            };
+
             // === MATH & SUBMIT ===
             const handleAddItem = (e) => {
                 e.preventDefault();
@@ -145,6 +159,7 @@
                     const result = await response.json();
                     if(result.result === "success") {
                         fetchBills(); 
+                        loadRandomVerse(); // Instantly loads a fresh verse for this customer!
                         navigateTo('receipt');
                     } else alert("Error saving to Google Sheets.");
                 } catch (error) { alert("Submission failed. Check internet connection."); }
@@ -258,7 +273,7 @@
             const BillListItem = ({ bill }) => {
                 const initial = bill.customerName ? bill.customerName.charAt(0).toUpperCase() : 'M';
                 return (
-                    <div className={`${theme.card} p-4 mb-4 rounded-2xl flex items-center gap-4 transition-transform active:scale-95 cursor-pointer`} onClick={() => { loadBillData(bill); navigateTo('receipt'); }}>
+                    <div className={`${theme.card} p-4 mb-4 rounded-2xl flex items-center gap-4 transition-transform active:scale-95 cursor-pointer`} onClick={() => { loadBillData(bill); loadRandomVerse(); navigateTo('receipt'); }}>
                         <div className={`w-14 h-14 rounded-full ${theme.primaryGradient} flex items-center justify-center text-white font-bold text-2xl shadow-lg shrink-0`}>
                             {initial}
                         </div>
@@ -498,13 +513,11 @@
                                 <h1 className={`text-2xl font-black ${theme.text}`}>Digital Receipt</h1>
                             </div>
 
-                            {/* RECEIPT IS ALWAYS LIGHT MODE FOR A CLEAN PRINT/SHARE LOOK */}
                             <div id="receipt-capture" className="bg-white rounded-3xl overflow-hidden shadow-2xl relative text-slate-900 border border-slate-200">
                                 {editingBillId && (
                                     <div className="absolute top-3 right-3 bg-yellow-400 text-yellow-900 text-xs font-black px-3 py-1 rounded-full z-10 shadow-sm">UPDATED</div>
                                 )}
                                 
-                                {/* Very Top Glorious Text */}
                                 <div className="bg-white text-center pt-3 pb-2">
                                     <span className="font-serif italic font-extrabold text-xl text-yellow-600">தேவனுக்கே மகிமை</span>
                                 </div>
@@ -515,10 +528,10 @@
                                     <p className="text-sm opacity-90 font-medium">Srivilliputtur</p>
                                     <p className="text-sm font-bold opacity-90">Ph: +91 9876543210</p> 
                                     
-                                    {/* MOCKUP FOR YOUR BIBLE.JS DATA */}
+                                    {/* 🌟 365 BIBLE.JS VAULT VERSE POPULATES HERE 🌟 */}
                                     <div className="mt-5 p-4 bg-black/20 rounded-2xl shadow-sm border border-white/10">
-                                        <p className="text-base font-bold mb-2 leading-relaxed">{dailyVerseTamil}</p>
-                                        <p className="text-xs italic font-serif opacity-80">{dailyVerseEnglish}</p>
+                                        <p className="text-base font-bold mb-2 leading-relaxed">{currentVerse.tamil}</p>
+                                        <p className="text-xs italic font-serif opacity-80">{currentVerse.text} - {currentVerse.ref}</p>
                                     </div>
                                 </div>
 
