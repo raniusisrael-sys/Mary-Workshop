@@ -62,20 +62,20 @@
             opacity: 0;
             position: absolute;
             bottom: 25%;
-            width: 340px;
+            width: 360px;
             z-index: 50;
-            filter: drop-shadow(0px 20px 10px rgba(34,211,238,0.4));
+            filter: drop-shadow(0px 20px 15px rgba(34,211,238,0.5));
         }
         .phase-2-road {
-            animation: fadeInOut 3.5s cubic-bezier(0.25, 1, 0.5, 1) forwards, roadMove 0.4s linear infinite;
+            animation: fadeInOut 3.5s cubic-bezier(0.25, 1, 0.5, 1) forwards, roadMove 0.3s linear infinite;
             animation-delay: 2.8s, 0s;
             opacity: 0;
             background-image: linear-gradient(90deg, #64748b 50%, transparent 50%);
-            background-size: 40px 100%;
+            background-size: 60px 100%;
             position: absolute;
             bottom: 24%;
             width: 100%;
-            height: 4px;
+            height: 5px;
             z-index: 40;
         }
     </style>
@@ -89,7 +89,7 @@
         // Connected to your exact Google Script URL
         const GOOGLE_SHEETS_URL = "https://script.google.com/macros/s/AKfycbyOzAZoSlxeTHk0A2uEM8Ehsc8aKSgDeSd3eNvi1r7ylDkYHLVH144PdeHH1hkw0i0/exec"; 
 
-        // 🌟 GLOBAL AUDIO MANAGER (USING UNBREAKABLE GOOGLE SOUNDS) 🌟
+        // 🌟 GLOBAL AUDIO MANAGER (SYNCED FOR MOBILE BROWSERS) 🌟
         const playSound = (type) => {
             try {
                 let url = '';
@@ -99,6 +99,7 @@
                 
                 const audio = new Audio(url);
                 audio.volume = type === 'click' ? 0.4 : 1.0; 
+                // Play immediately so mobile browsers don't block it
                 audio.play().catch(e => console.log("Audio blocked by browser auto-play policy", e));
             } catch(e) {}
         };
@@ -193,14 +194,12 @@
                 }
             };
 
-            // 🌟 EXTENDED CINEMATIC SPLASH ENGINE 🌟
+            // 🌟 EXTENDED CINEMATIC SPLASH ENGINE (AUDIO FIXED) 🌟
             const startEngineAndApp = () => {
-                playSound('click'); 
+                // Audio triggered synchronously with the click to bypass browser blocks
+                playSound('bike'); 
                 loadRandomVerse();
                 setCurrentScreen('splash');
-                
-                // Bike roars perfectly synced with Phase 2 (at 2.6 seconds)
-                setTimeout(() => { playSound('bike'); }, 2600);
                 
                 // Dashboard loads smoothly after the epic 6.5 second sequence
                 setTimeout(() => {
@@ -465,8 +464,11 @@
                                 </div>
                             </div>
                                 
+                            {/* 🏍️ LOAD YOUR CUSTOM BIKE HERE 🏍️ */}
+                            {/* Download a cool bike image, name it bike.png, upload to GitHub. Fallback to a reliable icon if missing */}
                             <img 
-                                src="https://upload.wikimedia.org/wikipedia/commons/thumb/c/ca/Triumph_Daytona_675.png/1024px-Triumph_Daytona_675.png" 
+                                src="./bike.png" 
+                                onError={(e) => { e.target.onerror = null; e.target.src="https://pngimg.com/d/motorcycle_PNG5341.png" }}
                                 className="phase-2-bike" 
                                 alt="Superbike" 
                             />
@@ -686,13 +688,14 @@
                                     <span className="font-serif italic font-extrabold text-xl text-yellow-600">தேவனுக்கே மகிமை</span>
                                 </div>
 
+                                {/* 🌟 UPDATED SHOP ADDRESS SECTION 🌟 */}
                                 <div className="bg-gradient-to-r from-violet-600 to-indigo-700 p-6 text-center text-white rounded-t-3xl shadow-inner">
-                                    <h1 className="text-3xl font-black tracking-wider uppercase mb-1">Mary</h1>
-                                    <p className="text-lg font-bold tracking-widest uppercase opacity-90 mb-3">Two Wheelar Workshop</p>
-                                    <p className="text-sm opacity-90 font-medium">Srivilliputtur</p>
-                                    <p className="text-sm font-bold opacity-90">Ph: +91 9876543210</p> 
+                                    <h1 className="text-3xl font-black tracking-wider uppercase mb-1">மேரி</h1>
+                                    <p className="text-lg font-bold tracking-widest uppercase opacity-90 mb-2">டூவீலர் ஒர்க்ஸ்</p>
+                                    <p className="text-sm opacity-90 font-medium">ஆத்துகடை தெரு</p>
+                                    <p className="text-sm opacity-90 font-medium">திருவில்லிபுத்தூர்</p>
+                                    <p className="text-sm font-bold opacity-90 mt-2">தொடர்பு:- 9585652521<br/>63800 90774</p> 
                                     
-                                    {/* 🌟 RANDOM VAULT BIBLE VERSE 🌟 */}
                                     <div className="mt-5 p-4 bg-black/20 rounded-2xl shadow-sm border border-white/10">
                                         <p className="text-base font-bold mb-2 leading-relaxed">{currentVerse.tamil}</p>
                                         <p className="text-xs italic font-serif opacity-80">{currentVerse.text} - {currentVerse.ref}</p>
@@ -737,7 +740,15 @@
                                         </div>
                                     )}
                                 </div>
-                                <div className="bg-slate-50 p-5 text-center"><p className="text-slate-600 font-bold text-base">நன்றி! மீண்டும் வருக!</p></div>
+                                
+                                {/* 🌟 GOOGLE REVIEW & THANK YOU SECTION 🌟 */}
+                                <div className="bg-slate-50 p-5 text-center border-t-2 border-dashed border-slate-200">
+                                    <p className="text-slate-600 font-bold text-base mb-3">நன்றி! மீண்டும் வருக!</p>
+                                    <div className="inline-block bg-white border border-slate-200 p-3 rounded-xl shadow-sm w-full">
+                                        <p className="text-xs text-slate-500 font-bold mb-1">Please Review Us on Google ⭐⭐⭐⭐⭐</p>
+                                        <p className="text-[11px] text-indigo-600 font-bold break-all">https://share.google/JIPz4fhs2eKsi5Nel</p>
+                                    </div>
+                                </div>
                             </div>
 
                             <div className="mt-8 flex gap-3">
