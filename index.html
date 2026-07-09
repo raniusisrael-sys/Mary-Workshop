@@ -4,12 +4,16 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mary Two Wheelar Workshop</title>
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- React & Babel -->
     <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <!-- html2canvas -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     
+    <!-- 🌟 CONNECTS YOUR 365 BIBLE VERSES FROM THE VAULT 🌟 -->
     <script src="./bible.js"></script>
 
     <style>
@@ -19,47 +23,15 @@
         .glow-input:focus { box-shadow: 0 0 15px rgba(99, 102, 241, 0.4); border-color: #6366f1; }
         .glow-button { box-shadow: 0 0 20px rgba(139, 92, 246, 0.5); }
         
-        /* 🌟 CINEMATIC SPLASH SCREEN ANIMATIONS 🌟 */
-        @keyframes fadeOutVerse {
-            0% { opacity: 0; transform: scale(0.95); }
-            15% { opacity: 1; transform: scale(1); }
-            80% { opacity: 1; transform: scale(1); }
-            100% { opacity: 0; transform: scale(1.05); }
-        }
-        @keyframes fadeInOut {
-            0% { opacity: 0; transform: scale(1.1); filter: blur(4px); }
-            15% { opacity: 1; transform: scale(1); filter: blur(0px); }
-            85% { opacity: 1; transform: scale(1); filter: blur(0px); }
-            100% { opacity: 0; transform: scale(1.05); filter: blur(3px); }
-        }
-        @keyframes driveBike {
-            0% { transform: translateX(-150vw) scale(0.8) rotate(-15deg); opacity: 0; }
-            20% { transform: translateX(-10vw) scale(1) rotate(0deg); opacity: 1; }
-            80% { transform: translateX(10vw) scale(1) rotate(0deg); opacity: 1; }
-            100% { transform: translateX(150vw) scale(0.8) rotate(15deg); opacity: 0; }
-        }
-        @keyframes roadMove {
-            0% { background-position: 0 0; }
-            100% { background-position: -200px 0; }
-        }
+        @keyframes fadeOutVerse { 0% { opacity: 0; transform: scale(0.95); } 15% { opacity: 1; transform: scale(1); } 80% { opacity: 1; transform: scale(1); } 100% { opacity: 0; transform: scale(1.05); } }
+        @keyframes fadeInOut { 0% { opacity: 0; transform: scale(1.1); filter: blur(4px); } 15% { opacity: 1; transform: scale(1); filter: blur(0px); } 85% { opacity: 1; transform: scale(1); filter: blur(0px); } 100% { opacity: 0; transform: scale(1.05); filter: blur(3px); } }
+        @keyframes driveBike { 0% { transform: translateX(-150vw) scale(0.8) rotate(-15deg); opacity: 0; } 20% { transform: translateX(-10vw) scale(1) rotate(0deg); opacity: 1; } 80% { transform: translateX(10vw) scale(1) rotate(0deg); opacity: 1; } 100% { transform: translateX(150vw) scale(0.8) rotate(15deg); opacity: 0; } }
+        @keyframes roadMove { 0% { background-position: 0 0; } 100% { background-position: -200px 0; } }
         
         .phase-1 { animation: fadeOutVerse 3s cubic-bezier(0.25, 1, 0.5, 1) forwards; }
-        .phase-2-text {
-            animation: fadeInOut 3.5s cubic-bezier(0.25, 1, 0.5, 1) forwards;
-            animation-delay: 2.8s; opacity: 0;
-        }
-        .phase-2-bike {
-            animation: driveBike 3.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
-            animation-delay: 2.8s; opacity: 0; position: absolute; bottom: 25%;
-            width: 360px; z-index: 50; filter: drop-shadow(0px 20px 15px rgba(34,211,238,0.5));
-        }
-        .phase-2-road {
-            animation: fadeInOut 3.5s cubic-bezier(0.25, 1, 0.5, 1) forwards, roadMove 0.3s linear infinite;
-            animation-delay: 2.8s, 0s; opacity: 0;
-            background-image: linear-gradient(90deg, #64748b 50%, transparent 50%);
-            background-size: 60px 100%; position: absolute; bottom: 24%;
-            width: 100%; height: 5px; z-index: 40;
-        }
+        .phase-2-text { animation: fadeInOut 3.5s cubic-bezier(0.25, 1, 0.5, 1) forwards; animation-delay: 2.8s; opacity: 0; }
+        .phase-2-bike { animation: driveBike 3.5s cubic-bezier(0.4, 0, 0.2, 1) forwards; animation-delay: 2.8s; opacity: 0; position: absolute; bottom: 25%; width: 360px; z-index: 50; filter: drop-shadow(0px 20px 15px rgba(34,211,238,0.5)); }
+        .phase-2-road { animation: fadeInOut 3.5s cubic-bezier(0.25, 1, 0.5, 1) forwards, roadMove 0.3s linear infinite; animation-delay: 2.8s, 0s; opacity: 0; background-image: linear-gradient(90deg, #64748b 50%, transparent 50%); background-size: 60px 100%; position: absolute; bottom: 24%; width: 100%; height: 5px; z-index: 40; }
     </style>
 </head>
 <body class="font-sans antialiased selection:bg-indigo-500 selection:text-white transition-colors duration-300">
@@ -67,16 +39,13 @@
 
     <script type="text/babel">
         const { useState, useEffect } = React;
-        
         const GOOGLE_SHEETS_URL = "https://script.google.com/macros/s/AKfycbyOzAZoSlxeTHk0A2uEM8Ehsc8aKSgDeSd3eNvi1r7ylDkYHLVH144PdeHH1hkw0i0/exec"; 
 
         function App() {
-            // === CONFIG ===
             const upiID = "weslyragland-1@okaxis"; 
             const shopName = "Mary Two Wheelar Workshop";
             const googleReviewLink = "https://share.google/JIPz4fhs2eKsi5Nel";
             
-            // === STATE ===
             const [isDarkMode, setIsDarkMode] = useState(true); 
             const [currentScreen, setCurrentScreen] = useState('pre-splash');
             
@@ -85,7 +54,6 @@
                 return typeof getCalculatedDailyVerseObject === 'function' ? getCalculatedDailyVerseObject() : fallbackVerse;
             });
             
-            // Form States
             const [customerName, setCustomerName] = useState('');
             const [phone, setPhone] = useState('');
             const [vehicleModel, setVehicleModel] = useState('');
@@ -99,17 +67,14 @@
             const [editingBillId, setEditingBillId] = useState(null); 
             const [billDate, setBillDate] = useState(new Date().toISOString());
 
-            // 🌟 NEW OPTIMIZED DATABASE ENGINE STATES 🌟
             const [allBills, setAllBills] = useState([]);
             const [searchQuery, setSearchQuery] = useState('');
-            const [isLoadingBills, setIsLoadingBills] = useState(true); // Hard block (only true if no cache exists)
-            const [isSyncing, setIsSyncing] = useState(false); // Soft block (background updating)
+            const [isLoadingBills, setIsLoadingBills] = useState(true);
 
             const [payModalBill, setPayModalBill] = useState(null);
             const [modalPayAmount, setModalPayAmount] = useState('');
             const [modalPayMethod, setModalPayMethod] = useState('Cash');
 
-            // === THEME CLASSES ===
             const theme = {
                 bg: isDarkMode ? 'bg-[#0f172a]' : 'bg-slate-100',
                 text: isDarkMode ? 'text-slate-100' : 'text-slate-900',
@@ -120,40 +85,23 @@
                 primaryGradient: 'bg-gradient-to-r from-violet-600 to-indigo-600'
             };
 
-            // 🌟 HIGH-SPEED FETCHING WITH CACHE MEMORY 🌟
             const fetchBills = async () => {
-                // 1. Instantly pull from memory cache
-                const cachedBills = localStorage.getItem('mary_bills_cache');
-                if (cachedBills) {
-                    setAllBills(JSON.parse(cachedBills));
-                    setIsLoadingBills(false); // Stop the heavy loading screen immediately!
-                } else {
-                    setIsLoadingBills(true); // Only show heavy loading screen if completely empty
-                }
-
-                // 2. Silently sync with Google Sheets in the background
-                setIsSyncing(true);
+                setIsLoadingBills(true);
                 try {
                     const response = await fetch(GOOGLE_SHEETS_URL);
                     const json = await response.json();
                     if (json.result === 'success') {
-                        const freshBills = json.data.reverse();
-                        setAllBills(freshBills); // Update UI
-                        localStorage.setItem('mary_bills_cache', JSON.stringify(freshBills)); // Save to memory for next time
+                        // 🌟 HIDES ANY DELETED BILLS 🌟
+                        const activeBills = json.data.reverse().filter(b => b.status !== 'Deleted');
+                        setAllBills(activeBills); 
                     }
-                } catch (error) { console.error("Sync failed"); }
-                
+                } catch (error) { console.error("Failed to load bills"); }
                 setIsLoadingBills(false);
-                setIsSyncing(false);
             };
 
             useEffect(() => {
                 fetchBills();
-                const handlePopState = (e) => {
-                    if (e.state && e.state.screen) {
-                        setCurrentScreen(e.state.screen);
-                    }
-                };
+                const handlePopState = (e) => { if (e.state && e.state.screen) setCurrentScreen(e.state.screen); };
                 window.addEventListener('popstate', handlePopState);
                 window.history.replaceState({ screen: 'pre-splash' }, '');
                 return () => window.removeEventListener('popstate', handlePopState);
@@ -182,7 +130,6 @@
                 }, 6500);
             };
 
-            // === MATH & SUBMIT ===
             const handleAddItem = (e) => {
                 e.preventDefault();
                 if (selectedItem && itemPrice) {
@@ -201,6 +148,7 @@
 
             const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(`upi://pay?pa=${upiID}&pn=${encodeURIComponent(shopName)}&am=${balanceDue}&cu=INR`)}`;
 
+            // 🌟 THE DUPLICATE FIX: IMMEDIATE ID FETCHING 🌟
             const handleSubmitBill = async () => {
                 const hasVehicleDetail = customerName.trim() || phone.trim() || vehicleModel.trim() || vehicleNo.trim();
                 if(!hasVehicleDetail) return alert("Please enter at least one detail!");
@@ -221,8 +169,23 @@
                     const response = await fetch(GOOGLE_SHEETS_URL, { method: 'POST', body: JSON.stringify(billData) });
                     const result = await response.json();
                     if(result.result === "success") {
-                        // Immediately update local cache to prevent duplicate editing bugs
-                        fetchBills(); 
+                        
+                        // Grab the newly assigned Bill ID from Google Sheets instantly!
+                        try {
+                            const freshResponse = await fetch(GOOGLE_SHEETS_URL);
+                            const freshJson = await freshResponse.json();
+                            if (freshJson.result === 'success') {
+                                const activeBills = freshJson.data.reverse().filter(b => b.status !== 'Deleted');
+                                setAllBills(activeBills);
+                                
+                                // Bind the exact new ID to the form so editing on the receipt works perfectly
+                                if (!editingBillId) {
+                                    const newlyCreated = activeBills.find(b => b.customerName === customerName && b.grandTotal == grandTotal);
+                                    if(newlyCreated) setEditingBillId(newlyCreated.billId);
+                                }
+                            }
+                        } catch(e) {}
+
                         loadRandomVerse(); 
                         navigateTo('receipt');
                     } else alert("Error saving to Google Sheets.");
@@ -245,9 +208,33 @@
                 try { setItems(JSON.parse(bill.itemsJson)); } catch(e) { setItems([]); }
             };
 
-            const openPayModal = (bill) => {
-                setPayModalBill(bill); setModalPayAmount(bill.balanceDue); setModalPayMethod('Cash');
+            // 🌟 NEW DELETE FEATURE 🌟
+            const handleDeleteBill = async (billToDelete, e) => {
+                e.stopPropagation();
+                if(!window.confirm(`Are you sure you want to permanently delete the bill for ${billToDelete.customerName}?`)) return;
+                
+                // Hide locally immediately for fast UI
+                setAllBills(allBills.filter(b => b.billId !== billToDelete.billId));
+                
+                const deleteData = {
+                    action: "update",
+                    billId: billToDelete.billId,
+                    customerName: billToDelete.customerName, phone: billToDelete.phone, 
+                    vehicleModel: billToDelete.vehicleModel, vehicleNo: billToDelete.vehicleNo, 
+                    itemsString: billToDelete.itemsString, itemsArray: JSON.parse(billToDelete.itemsJson || "[]"), 
+                    sparesTotal: billToDelete.sparesTotal, cooli: billToDelete.cooli,
+                    grandTotal: billToDelete.grandTotal, paymentMethod: billToDelete.paymentMethod, 
+                    amountPaid: billToDelete.amountPaid, balanceDue: billToDelete.balanceDue, 
+                    status: "Deleted" // The magic bullet!
+                };
+                
+                try {
+                    await fetch(GOOGLE_SHEETS_URL, { method: 'POST', body: JSON.stringify(deleteData) });
+                } catch (error) { alert("Delete failed to sync. Check internet."); }
             };
+
+            const openPayModal = (bill) => { setPayModalBill(bill); setModalPayAmount(bill.balanceDue); setModalPayMethod('Cash'); };
+            const closePayModal = () => { setPayModalBill(null); };
 
             const handleConfirmPayment = async () => {
                 if(!modalPayAmount || modalPayAmount <= 0) return alert("Enter a valid amount!");
@@ -272,9 +259,7 @@
                 try {
                     const response = await fetch(GOOGLE_SHEETS_URL, { method: 'POST', body: JSON.stringify(billData) });
                     const result = await response.json();
-                    if(result.result === "success") {
-                        setPayModalBill(null); fetchBills();
-                    } else alert("Error saving payment.");
+                    if(result.result === "success") { setPayModalBill(null); fetchBills(); }
                 } catch (error) { alert("Payment failed to save."); }
                 setIsSubmitting(false);
             };
@@ -287,7 +272,6 @@
                     canvas.toBlob(async (blob) => {
                         const fileName = customerName ? `Mary_Workshop_Bill_${customerName}.png` : `Workshop_Bill.png`;
                         const file = new File([blob], fileName, { type: "image/png" });
-                        
                         const shareMessage = `மேரி டூவீலர் ஒர்க்ஸ் (Mary Two Wheelar Workshop)\n\nநன்றி! மீண்டும் வருக!\n\nஎங்கள் சேவைகளை Google-ல் மதிப்பிடவும் ⭐⭐⭐⭐⭐:\n${googleReviewLink}`;
 
                         if (navigator.canShare && navigator.canShare({ files: [file] })) {
@@ -319,14 +303,6 @@
                 </div>
             );
 
-            // 🌟 UPDATED STATUS INDICATOR (Syncing vs Online) 🌟
-            const StatusIndicator = () => (
-                <p className={`text-sm font-bold ${theme.textMuted} mt-1 flex items-center gap-2`}>
-                    <span className={`w-2.5 h-2.5 rounded-full ${isSyncing ? 'bg-yellow-400 animate-pulse' : 'bg-emerald-500'}`}></span> 
-                    {isSyncing ? 'Syncing...' : 'Online'}
-                </p>
-            );
-
             const BottomNav = () => (
                 <div className={`fixed bottom-0 w-full max-w-md mx-auto inset-x-0 ${theme.glass} border-t flex justify-around p-3 z-40 pb-6 rounded-t-3xl`}>
                     <button onClick={() => navigateTo('dashboard')} className={`flex flex-col items-center gap-1 transition-all ${currentScreen === 'dashboard' ? 'text-indigo-500 scale-110 font-bold' : theme.textMuted}`}>
@@ -350,6 +326,7 @@
                 </button>
             );
 
+            // 🌟 DASHBOARD LIST ITEM (WITH DELETE BUTTON) 🌟
             const BillListItem = ({ bill }) => {
                 const initial = bill.customerName ? bill.customerName.charAt(0).toUpperCase() : 'M';
                 return (
@@ -379,12 +356,14 @@
                                 <span className="bg-emerald-500/20 text-emerald-500 px-3 py-1 rounded-lg text-xs font-bold border border-emerald-500/20">Fully Paid</span>
                             )}
                             
-                            <button 
-                                onClick={(e) => { e.stopPropagation(); loadBillData(bill); navigateTo('newBill'); }} 
-                                className={`flex items-center gap-1 text-indigo-500 ${isDarkMode ? 'bg-indigo-500/10 hover:bg-indigo-500/20' : 'bg-indigo-100 hover:bg-indigo-200'} px-4 py-1.5 rounded-xl text-sm font-bold border border-indigo-500/20 active:scale-95 transition-transform`}
-                            >
-                                ✏️ Edit
-                            </button>
+                            <div className="flex gap-2">
+                                <button onClick={(e) => handleDeleteBill(bill, e)} className={`flex items-center text-rose-500 ${isDarkMode ? 'bg-rose-500/10 hover:bg-rose-500/20' : 'bg-rose-100 hover:bg-rose-200'} px-3 py-1.5 rounded-xl text-sm font-bold active:scale-95 transition-transform`}>
+                                    🗑️
+                                </button>
+                                <button onClick={(e) => { e.stopPropagation(); loadBillData(bill); navigateTo('newBill'); }} className={`flex items-center gap-1 text-indigo-500 ${isDarkMode ? 'bg-indigo-500/10 hover:bg-indigo-500/20' : 'bg-indigo-100 hover:bg-indigo-200'} px-4 py-1.5 rounded-xl text-sm font-bold active:scale-95 transition-transform`}>
+                                    ✏️ Edit
+                                </button>
+                            </div>
                         </div>
                     </div>
                 );
@@ -399,7 +378,6 @@
                             <div className="text-center z-10 p-6 flex flex-col items-center">
                                 <h1 className="text-4xl font-black tracking-widest uppercase font-serif bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 to-indigo-500 mb-2 drop-shadow-md">Mary</h1>
                                 <h2 className="text-sm tracking-widest uppercase text-slate-400 font-bold mb-10">Workshop System</h2>
-                                
                                 <button onClick={startEngineAndApp} className="bg-gradient-to-r from-emerald-400 to-emerald-600 text-slate-900 font-black text-xl px-10 py-5 rounded-full glow-button hover:scale-105 active:scale-95 transition-all shadow-[0_0_40px_rgba(52,211,153,0.5)] border-2 border-emerald-300">
                                     START ENGINE 🏍️
                                 </button>
@@ -445,7 +423,9 @@
                                 <div className="flex justify-between items-center mt-2">
                                     <div>
                                         <h1 className="text-2xl font-black tracking-wide text-transparent bg-clip-text bg-gradient-to-r from-violet-500 to-indigo-500">Mary Workshop</h1>
-                                        <StatusIndicator />
+                                        <p className={`text-sm font-bold ${theme.textMuted} mt-1 flex items-center gap-2`}>
+                                            <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span> Online
+                                        </p>
                                     </div>
                                     <button onClick={toggleTheme} className={`w-10 h-10 rounded-full flex items-center justify-center ${theme.card} text-xl shadow-md`}>
                                         {isDarkMode ? '☀️' : '🌙'}
@@ -455,7 +435,7 @@
                             <div className="px-4">
                                 <h2 className={`text-sm font-bold ${theme.textMuted} uppercase tracking-wider mb-4 ml-2`}>Recent Bills</h2>
                                 {isLoadingBills ? (
-                                    <div className="text-center text-indigo-500 mt-10 animate-pulse font-bold text-lg">Loading Database...</div>
+                                    <div className="text-center text-indigo-500 mt-10 animate-pulse font-bold text-lg">Syncing database...</div>
                                 ) : (
                                     <div>{allBills.length === 0 ? <p className={`text-center mt-10 ${theme.textMuted} text-lg`}>No records found.</p> : allBills.map((bill, idx) => <BillListItem key={idx} bill={bill} />)}</div>
                                 )}
@@ -638,10 +618,9 @@
                                 <h1 className={`text-2xl font-black ${theme.text}`}>Digital Receipt</h1>
                             </div>
 
-                            {/* 🌟 PERFECTED BOUNDS FOR CLEAN SCREENSHOT CAPTURE 🌟 */}
-                            <div id="receipt-capture" className="bg-white relative text-slate-900 shadow-none border-0 w-full max-w-md mx-auto pb-6">
+                            <div id="receipt-capture" className="bg-white relative text-slate-900 shadow-none border-0 w-full max-w-md mx-auto pb-4">
                                 
-                                <div className="bg-white text-center pt-5 pb-3 relative">
+                                <div className="bg-white text-center pt-5 pb-3">
                                     <span className="font-serif italic font-extrabold text-xl text-yellow-600">தேவனுக்கே மகிமை</span>
                                 </div>
 
@@ -695,9 +674,6 @@
                                             <p className="text-slate-800 text-sm font-black">Scan to pay balance: ₹{balanceDue}</p>
                                         </div>
                                     )}
-                                </div>
-                                <div className="bg-white pt-5 pb-2 text-center border-0">
-                                    <p className="text-slate-600 font-bold text-base m-0">நன்றி! மீண்டும் வருக!</p>
                                 </div>
                             </div>
 
