@@ -4,34 +4,36 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mary Two Wheelar Workshop</title>
-    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- React & Babel -->
     <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-    <!-- html2canvas -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     
-    <!-- 🌟 CONNECTS YOUR 365 BIBLE VERSES FROM THE VAULT 🌟 -->
     <script src="./bible.js"></script>
 
     <style>
-        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar { width: 4px; height: 4px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: #6366f1; border-radius: 10px; }
-        .glow-input:focus { box-shadow: 0 0 15px rgba(99, 102, 241, 0.4); border-color: #6366f1; }
-        .glow-button { box-shadow: 0 0 20px rgba(139, 92, 246, 0.5); }
+        .glow-input:focus { box-shadow: 0 0 10px rgba(99, 102, 241, 0.3); border-color: #6366f1; }
         
-        @keyframes fadeOutVerse { 0% { opacity: 0; transform: scale(0.95); } 15% { opacity: 1; transform: scale(1); } 80% { opacity: 1; transform: scale(1); } 100% { opacity: 0; transform: scale(1.05); } }
-        @keyframes fadeInOut { 0% { opacity: 0; transform: scale(1.1); filter: blur(4px); } 15% { opacity: 1; transform: scale(1); filter: blur(0px); } 85% { opacity: 1; transform: scale(1); filter: blur(0px); } 100% { opacity: 0; transform: scale(1.05); filter: blur(3px); } }
-        @keyframes driveBike { 0% { transform: translateX(-150vw) scale(0.8) rotate(-15deg); opacity: 0; } 20% { transform: translateX(-10vw) scale(1) rotate(0deg); opacity: 1; } 80% { transform: translateX(10vw) scale(1) rotate(0deg); opacity: 1; } 100% { transform: translateX(150vw) scale(0.8) rotate(15deg); opacity: 0; } }
+        /* Cinematic Splash Animations */
+        @keyframes fadeOutVerse { 0%, 80% { opacity: 1; transform: scale(1); } 100% { opacity: 0; transform: scale(1.02); } }
+        @keyframes fadeInOut { 0% { opacity: 0; filter: blur(4px); } 15%, 85% { opacity: 1; filter: blur(0px); } 100% { opacity: 0; filter: blur(3px); } }
+        @keyframes driveBike { 0% { transform: translateX(-150vw) scale(0.8) rotate(-10deg); opacity: 0; } 20%, 80% { transform: translateX(-5vw) scale(1) rotate(0deg); opacity: 1; } 100% { transform: translateX(150vw) scale(0.8) rotate(10deg); opacity: 0; } }
         @keyframes roadMove { 0% { background-position: 0 0; } 100% { background-position: -200px 0; } }
         
         .phase-1 { animation: fadeOutVerse 3s cubic-bezier(0.25, 1, 0.5, 1) forwards; }
-        .phase-2-text { animation: fadeInOut 3.5s cubic-bezier(0.25, 1, 0.5, 1) forwards; animation-delay: 2.8s; opacity: 0; }
-        .phase-2-bike { animation: driveBike 3.5s cubic-bezier(0.4, 0, 0.2, 1) forwards; animation-delay: 2.8s; opacity: 0; position: absolute; bottom: 25%; width: 360px; z-index: 50; filter: drop-shadow(0px 20px 15px rgba(34,211,238,0.5)); }
-        .phase-2-road { animation: fadeInOut 3.5s cubic-bezier(0.25, 1, 0.5, 1) forwards, roadMove 0.3s linear infinite; animation-delay: 2.8s, 0s; opacity: 0; background-image: linear-gradient(90deg, #64748b 50%, transparent 50%); background-size: 60px 100%; position: absolute; bottom: 24%; width: 100%; height: 5px; z-index: 40; }
+        .phase-2-text { animation: fadeInOut 3.5s forwards; animation-delay: 2.8s; opacity: 0; }
+        .phase-2-bike { animation: driveBike 3.5s forwards; animation-delay: 2.8s; opacity: 0; position: absolute; bottom: 25%; width: 280px; z-index: 50; filter: drop-shadow(0px 10px 10px rgba(34,211,238,0.4)); }
+        .phase-2-road { animation: fadeInOut 3.5s forwards, roadMove 0.3s linear infinite; animation-delay: 2.8s, 0s; opacity: 0; background-image: linear-gradient(90deg, #64748b 50%, transparent 50%); background-size: 60px 100%; position: absolute; bottom: 24%; width: 100%; height: 4px; z-index: 40; }
+
+        /* Gear Loading Animation */
+        @keyframes spin { 100% { transform: rotate(360deg); } }
+        @keyframes spin-reverse { 100% { transform: rotate(-360deg); } }
+        .gear-1 { animation: spin 2.5s linear infinite; }
+        .gear-2 { animation: spin-reverse 2.5s linear infinite; }
     </style>
 </head>
 <body class="font-sans antialiased selection:bg-indigo-500 selection:text-white transition-colors duration-300">
@@ -40,6 +42,15 @@
     <script type="text/babel">
         const { useState, useEffect } = React;
         const GOOGLE_SHEETS_URL = "https://script.google.com/macros/s/AKfycbyOzAZoSlxeTHk0A2uEM8Ehsc8aKSgDeSd3eNvi1r7ylDkYHLVH144PdeHH1hkw0i0/exec"; 
+
+        // 🌟 QUICK ADD INVENTORY FOR FAST WORK 🌟
+        const QUICK_ITEMS = [
+            { name: "Water Wash", price: 150 },
+            { name: "Oil Change", price: 400 },
+            { name: "General Service", price: 500 },
+            { name: "Chain Lube", price: 50 },
+            { name: "Brake Tight", price: 40 }
+        ];
 
         function App() {
             const upiID = "weslyragland-1@okaxis"; 
@@ -54,6 +65,7 @@
                 return typeof getCalculatedDailyVerseObject === 'function' ? getCalculatedDailyVerseObject() : fallbackVerse;
             });
             
+            // Form States
             const [customerName, setCustomerName] = useState('');
             const [phone, setPhone] = useState('');
             const [vehicleModel, setVehicleModel] = useState('');
@@ -67,36 +79,45 @@
             const [editingBillId, setEditingBillId] = useState(null); 
             const [billDate, setBillDate] = useState(new Date().toISOString());
 
+            // Database States
             const [allBills, setAllBills] = useState([]);
             const [searchQuery, setSearchQuery] = useState('');
             const [isLoadingBills, setIsLoadingBills] = useState(true);
+            const [isSyncing, setIsSyncing] = useState(false); 
 
             const [payModalBill, setPayModalBill] = useState(null);
             const [modalPayAmount, setModalPayAmount] = useState('');
             const [modalPayMethod, setModalPayMethod] = useState('Cash');
 
+            // WHATSAPP STYLE THEME (Tighter styling)
             const theme = {
-                bg: isDarkMode ? 'bg-[#0f172a]' : 'bg-slate-100',
+                bg: isDarkMode ? 'bg-[#0f172a]' : 'bg-slate-50',
                 text: isDarkMode ? 'text-slate-100' : 'text-slate-900',
                 textMuted: isDarkMode ? 'text-slate-400' : 'text-slate-500',
-                glass: isDarkMode ? 'bg-slate-800/80 border-slate-700/50 backdrop-blur-xl' : 'bg-white border-slate-200 shadow-xl',
-                input: isDarkMode ? 'bg-slate-900 border-slate-700 text-white' : 'bg-slate-50 border-slate-300 text-slate-900',
-                card: isDarkMode ? 'bg-slate-800/90 border-slate-700/50' : 'bg-white border-slate-200 shadow-md',
+                glass: isDarkMode ? 'bg-slate-800/90 border-slate-700/50 backdrop-blur-md' : 'bg-white border-slate-200 shadow-sm',
+                input: isDarkMode ? 'bg-slate-900 border-slate-700 text-white' : 'bg-slate-100 border-slate-300 text-slate-900',
+                card: isDarkMode ? 'bg-slate-800/90 border-slate-700/50' : 'bg-white border-slate-200 shadow-sm',
                 primaryGradient: 'bg-gradient-to-r from-violet-600 to-indigo-600'
             };
 
             const fetchBills = async () => {
-                setIsLoadingBills(true);
+                const cachedBills = localStorage.getItem('mary_bills_cache');
+                if (cachedBills) {
+                    setAllBills(JSON.parse(cachedBills));
+                    setIsLoadingBills(false); 
+                } else setIsLoadingBills(true);
+
+                setIsSyncing(true);
                 try {
                     const response = await fetch(GOOGLE_SHEETS_URL);
                     const json = await response.json();
                     if (json.result === 'success') {
-                        // 🌟 HIDES ANY DELETED BILLS 🌟
                         const activeBills = json.data.reverse().filter(b => b.status !== 'Deleted');
                         setAllBills(activeBills); 
+                        localStorage.setItem('mary_bills_cache', JSON.stringify(activeBills)); 
                     }
-                } catch (error) { console.error("Failed to load bills"); }
-                setIsLoadingBills(false);
+                } catch (error) {}
+                setIsLoadingBills(false); setIsSyncing(false);
             };
 
             useEffect(() => {
@@ -137,6 +158,11 @@
                     setSelectedItem(''); setItemPrice('');
                 }
             };
+            
+            const handleAddQuickItem = (qItem, e) => {
+                e.preventDefault();
+                setItems([...items, { name: qItem.name, price: qItem.price }]);
+            };
 
             const removeItem = (index) => setItems(items.filter((_, i) => i !== index));
 
@@ -148,13 +174,12 @@
 
             const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(`upi://pay?pa=${upiID}&pn=${encodeURIComponent(shopName)}&am=${balanceDue}&cu=INR`)}`;
 
-            // 🌟 THE DUPLICATE FIX: IMMEDIATE ID FETCHING 🌟
             const handleSubmitBill = async () => {
                 const hasVehicleDetail = customerName.trim() || phone.trim() || vehicleModel.trim() || vehicleNo.trim();
                 if(!hasVehicleDetail) return alert("Please enter at least one detail!");
-                if(items.length === 0 && !cooli) return alert("Please add at least one spare part or labor charge!");
+                if(items.length === 0 && !cooli) return alert("Please add at least one part or labor charge!");
                 
-                setIsSubmitting(true);
+                setIsSubmitting(true); // Triggers the Gear Loading View!
                 const itemsString = items.map(i => `${i.name} (₹${i.price})`).join(', ');
                 
                 const billData = {
@@ -169,23 +194,19 @@
                     const response = await fetch(GOOGLE_SHEETS_URL, { method: 'POST', body: JSON.stringify(billData) });
                     const result = await response.json();
                     if(result.result === "success") {
-                        
-                        // Grab the newly assigned Bill ID from Google Sheets instantly!
                         try {
                             const freshResponse = await fetch(GOOGLE_SHEETS_URL);
                             const freshJson = await freshResponse.json();
                             if (freshJson.result === 'success') {
                                 const activeBills = freshJson.data.reverse().filter(b => b.status !== 'Deleted');
                                 setAllBills(activeBills);
-                                
-                                // Bind the exact new ID to the form so editing on the receipt works perfectly
+                                localStorage.setItem('mary_bills_cache', JSON.stringify(activeBills)); 
                                 if (!editingBillId) {
                                     const newlyCreated = activeBills.find(b => b.customerName === customerName && b.grandTotal == grandTotal);
                                     if(newlyCreated) setEditingBillId(newlyCreated.billId);
                                 }
                             }
                         } catch(e) {}
-
                         loadRandomVerse(); 
                         navigateTo('receipt');
                     } else alert("Error saving to Google Sheets.");
@@ -208,33 +229,22 @@
                 try { setItems(JSON.parse(bill.itemsJson)); } catch(e) { setItems([]); }
             };
 
-            // 🌟 NEW DELETE FEATURE 🌟
             const handleDeleteBill = async (billToDelete, e) => {
                 e.stopPropagation();
-                if(!window.confirm(`Are you sure you want to permanently delete the bill for ${billToDelete.customerName}?`)) return;
+                if(!window.confirm(`Delete bill for ${billToDelete.customerName}?`)) return;
                 
-                // Hide locally immediately for fast UI
-                setAllBills(allBills.filter(b => b.billId !== billToDelete.billId));
+                setIsSubmitting(true); // Show gears while deleting
+                const updatedList = allBills.filter(b => b.billId !== billToDelete.billId);
+                setAllBills(updatedList);
+                localStorage.setItem('mary_bills_cache', JSON.stringify(updatedList));
                 
-                const deleteData = {
-                    action: "update",
-                    billId: billToDelete.billId,
-                    customerName: billToDelete.customerName, phone: billToDelete.phone, 
-                    vehicleModel: billToDelete.vehicleModel, vehicleNo: billToDelete.vehicleNo, 
-                    itemsString: billToDelete.itemsString, itemsArray: JSON.parse(billToDelete.itemsJson || "[]"), 
-                    sparesTotal: billToDelete.sparesTotal, cooli: billToDelete.cooli,
-                    grandTotal: billToDelete.grandTotal, paymentMethod: billToDelete.paymentMethod, 
-                    amountPaid: billToDelete.amountPaid, balanceDue: billToDelete.balanceDue, 
-                    status: "Deleted" // The magic bullet!
-                };
-                
-                try {
-                    await fetch(GOOGLE_SHEETS_URL, { method: 'POST', body: JSON.stringify(deleteData) });
-                } catch (error) { alert("Delete failed to sync. Check internet."); }
+                const deleteData = { ...billToDelete, action: "update", status: "Deleted", itemsArray: JSON.parse(billToDelete.itemsJson || "[]") };
+                try { await fetch(GOOGLE_SHEETS_URL, { method: 'POST', body: JSON.stringify(deleteData) }); } catch (error) {}
+                setIsSubmitting(false);
             };
 
             const openPayModal = (bill) => { setPayModalBill(bill); setModalPayAmount(bill.balanceDue); setModalPayMethod('Cash'); };
-            const closePayModal = () => { setPayModalBill(null); };
+            const closePayModal = () => setPayModalBill(null);
 
             const handleConfirmPayment = async () => {
                 if(!modalPayAmount || modalPayAmount <= 0) return alert("Enter a valid amount!");
@@ -246,21 +256,13 @@
                 const newBalance = Math.max(0, parseFloat(payModalBill.grandTotal) - newPaid);
                 const newStatus = newBalance > 0 ? 'Pending' : 'Paid';
 
-                const billData = {
-                    action: "update", billId: payModalBill.billId,
-                    customerName: payModalBill.customerName, phone: payModalBill.phone, 
-                    vehicleModel: payModalBill.vehicleModel, vehicleNo: payModalBill.vehicleNo, 
-                    itemsString: payModalBill.itemsString, itemsArray: JSON.parse(payModalBill.itemsJson || "[]"), 
-                    sparesTotal: payModalBill.sparesTotal, cooli: payModalBill.cooli,
-                    grandTotal: payModalBill.grandTotal, paymentMethod: modalPayMethod, 
-                    amountPaid: newPaid, balanceDue: newBalance, status: newStatus
-                };
+                const billData = { ...payModalBill, action: "update", itemsArray: JSON.parse(payModalBill.itemsJson || "[]"), paymentMethod: modalPayMethod, amountPaid: newPaid, balanceDue: newBalance, status: newStatus };
 
                 try {
                     const response = await fetch(GOOGLE_SHEETS_URL, { method: 'POST', body: JSON.stringify(billData) });
                     const result = await response.json();
                     if(result.result === "success") { setPayModalBill(null); fetchBills(); }
-                } catch (error) { alert("Payment failed to save."); }
+                } catch (error) {}
                 setIsSubmitting(false);
             };
 
@@ -270,7 +272,7 @@
                 try {
                     const canvas = await html2canvas(receiptElement, { scale: 2, useCORS: true, allowTaint: true, backgroundColor: "#ffffff" });
                     canvas.toBlob(async (blob) => {
-                        const fileName = customerName ? `Mary_Workshop_Bill_${customerName}.png` : `Workshop_Bill.png`;
+                        const fileName = customerName ? `Mary_Workshop_${customerName}.png` : `Workshop_Bill.png`;
                         const file = new File([blob], fileName, { type: "image/png" });
                         const shareMessage = `மேரி டூவீலர் ஒர்க்ஸ் (Mary Two Wheelar Workshop)\n\nநன்றி! மீண்டும் வருக!\n\nஎங்கள் சேவைகளை Google-ல் மதிப்பிடவும் ⭐⭐⭐⭐⭐:\n${googleReviewLink}`;
 
@@ -278,12 +280,12 @@
                             await navigator.share({ title: 'Mary Workshop Bill', text: shareMessage, files: [file] });
                         } else {
                             const link = document.createElement('a'); link.download = fileName; link.href = canvas.toDataURL(); link.click();
-                            alert(`Bill image downloaded! Please manually share this Google Review link with the customer:\n${googleReviewLink}`);
                         }
                     });
-                } catch (error) { alert("Oops, couldn't capture the bill."); }
+                } catch (error) { alert("Couldn't capture the bill."); }
             };
 
+            // Filters & Calculations
             const filteredBills = allBills.filter(bill => {
                 if (!searchQuery) return true;
                 const q = searchQuery.toLowerCase();
@@ -292,75 +294,112 @@
 
             const pendingBills = allBills.filter(bill => parseFloat(bill.balanceDue) > 0);
             const totalPendingAmount = pendingBills.reduce((sum, bill) => sum + parseFloat(bill.balanceDue), 0);
+            
+            // 🌟 NEW MONTHLY CALCULATIONS 🌟
+            const currentMonth = new Date().getMonth();
+            const currentYear = new Date().getFullYear();
+            const thisMonthBills = allBills.filter(bill => {
+                const bDate = new Date(bill.date);
+                return bDate.getMonth() === currentMonth && bDate.getFullYear() === currentYear;
+            });
+            const monthTotal = thisMonthBills.reduce((sum, bill) => sum + parseFloat(bill.grandTotal || 0), 0);
+
+            // History Check for New Bill Form
+            const customerHistory = allBills.filter(b => b.phone === phone && phone.length > 5 && b.billId !== editingBillId);
 
             // ==========================================
             // REUSABLE UI COMPONENTS
             // ==========================================
             
             const HeaderWord = () => (
-                <div className="w-full text-center pt-2 pb-1">
-                    <span className="font-serif italic font-extrabold text-lg text-yellow-500 tracking-wide">தேவனுக்கே மகிமை</span>
+                <div className="w-full text-center pt-1 pb-1">
+                    <span className="font-serif italic font-extrabold text-sm text-yellow-500 tracking-wider">தேவனுக்கே மகிமை</span>
                 </div>
             );
 
+            // The Loading / Syncing Indicator
+            const StatusIndicator = () => (
+                <p className={`text-[10px] font-bold ${theme.textMuted} flex items-center gap-1.5`}>
+                    <span className={`w-2 h-2 rounded-full ${isSyncing ? 'bg-yellow-400 animate-pulse' : 'bg-emerald-500'}`}></span> 
+                    {isSyncing ? 'Syncing...' : 'Online'}
+                </p>
+            );
+
+            // 🌟 THE GEAR LOADING MODAL 🌟
+            const GearLoader = () => isSubmitting ? (
+                <div className="fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-[100] flex flex-col items-center justify-center">
+                    <div className="relative w-20 h-20 flex items-center justify-center mb-4">
+                        {/* Big Gear */}
+                        <svg className="absolute w-12 h-12 text-indigo-500 gear-1 ml-5 mb-5" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M19.333 14.667a7.25 7.25 0 000-5.334l2.115-1.12c.365-.192.483-.65.234-1.026l-1.576-2.366c-.24-.36-.71-.462-1.066-.226l-2.074 1.38a7.35 7.35 0 00-4.043-2.316V1.33c0-.41-.334-.746-.745-.746H11.82c-.41 0-.745.335-.745.746v2.333a7.35 7.35 0 00-4.043 2.316L4.96 4.601c-.357-.236-.826-.134-1.066.226L2.318 7.193c-.249.375-.13.834.234 1.025l2.115 1.12a7.25 7.25 0 000 5.334l-2.115 1.12c-.364.192-.483.65-.234 1.026l1.576 2.366c.24.36.71.462 1.066.226l2.074-1.38a7.35 7.35 0 004.043 2.316v2.334c0 .41.334.745.745.745h1.358c.41 0 .745-.335.745-.745v-2.334a7.35 7.35 0 004.043-2.316l2.074 1.38c.356.236.826.134 1.066-.226l1.576-2.366c.249-.375.13-.834-.234-1.025l-2.115-1.12zM12 15.5a3.5 3.5 0 110-7 3.5 3.5 0 010 7z" />
+                        </svg>
+                        {/* Small Gear Interlocking */}
+                        <svg className="absolute w-8 h-8 text-cyan-400 gear-2 mr-6 mt-6" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M19.333 14.667a7.25 7.25 0 000-5.334l2.115-1.12c.365-.192.483-.65.234-1.026l-1.576-2.366c-.24-.36-.71-.462-1.066-.226l-2.074 1.38a7.35 7.35 0 00-4.043-2.316V1.33c0-.41-.334-.746-.745-.746H11.82c-.41 0-.745.335-.745.746v2.333a7.35 7.35 0 00-4.043 2.316L4.96 4.601c-.357-.236-.826-.134-1.066.226L2.318 7.193c-.249.375-.13.834.234 1.025l2.115 1.12a7.25 7.25 0 000 5.334l-2.115 1.12c-.364.192-.483.65-.234 1.026l1.576 2.366c.24.36.71.462 1.066.226l2.074-1.38a7.35 7.35 0 004.043 2.316v2.334c0 .41.334.745.745.745h1.358c.41 0 .745-.335.745-.745v-2.334a7.35 7.35 0 004.043-2.316l2.074 1.38c.356.236.826.134 1.066-.226l1.576-2.366c.249-.375.13-.834-.234-1.025l-2.115-1.12zM12 15.5a3.5 3.5 0 110-7 3.5 3.5 0 010 7z" />
+                        </svg>
+                    </div>
+                    <p className="text-cyan-300 font-bold text-xs tracking-[0.2em] animate-pulse">PROCESSING...</p>
+                </div>
+            ) : null;
+
             const BottomNav = () => (
-                <div className={`fixed bottom-0 w-full max-w-md mx-auto inset-x-0 ${theme.glass} border-t flex justify-around p-3 z-40 pb-6 rounded-t-3xl`}>
-                    <button onClick={() => navigateTo('dashboard')} className={`flex flex-col items-center gap-1 transition-all ${currentScreen === 'dashboard' ? 'text-indigo-500 scale-110 font-bold' : theme.textMuted}`}>
-                        <svg className="w-7 h-7" fill="currentColor" viewBox="0 0 20 20"><path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z"></path></svg>
-                        <span className="text-[11px]">Home</span>
+                <div className={`fixed bottom-0 w-full max-w-md mx-auto inset-x-0 ${theme.glass} border-t flex justify-around p-2 z-40 pb-5`}>
+                    <button onClick={() => navigateTo('dashboard')} className={`flex flex-col items-center gap-1 transition-all ${currentScreen === 'dashboard' ? 'text-indigo-500 scale-105 font-bold' : theme.textMuted}`}>
+                        <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20"><path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z"></path></svg>
+                        <span className="text-[10px]">Home</span>
                     </button>
-                    <button onClick={() => navigateTo('search')} className={`flex flex-col items-center gap-1 transition-all ${currentScreen === 'search' ? 'text-indigo-500 scale-110 font-bold' : theme.textMuted}`}>
-                        <svg className="w-7 h-7" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clipRule="evenodd"></path></svg>
-                        <span className="text-[11px]">Search</span>
+                    <button onClick={() => navigateTo('search')} className={`flex flex-col items-center gap-1 transition-all ${currentScreen === 'search' ? 'text-indigo-500 scale-105 font-bold' : theme.textMuted}`}>
+                        <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M8 4a4 4 0 100 8 4 4 0 000-8zM2 8a6 6 0 1110.89 3.476l4.817 4.817a1 1 0 01-1.414 1.414l-4.816-4.816A6 6 0 012 8z" clipRule="evenodd"></path></svg>
+                        <span className="text-[10px]">Search</span>
                     </button>
-                    <button onClick={() => navigateTo('pending')} className={`flex flex-col items-center gap-1 transition-all ${currentScreen === 'pending' ? 'text-indigo-500 scale-110 font-bold' : theme.textMuted}`}>
-                        <svg className="w-7 h-7" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M4 4a2 2 0 00-2 2v4a2 2 0 002 2V6h10a2 2 0 00-2-2H4zm2 6a2 2 0 012-2h8a2 2 0 012 2v4a2 2 0 01-2 2H8a2 2 0 01-2-2v-4zm6 4a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd"></path></svg>
-                        <span className="text-[11px]">Dues</span>
+                    <button onClick={() => navigateTo('pending')} className={`flex flex-col items-center gap-1 transition-all ${currentScreen === 'pending' ? 'text-indigo-500 scale-105 font-bold' : theme.textMuted}`}>
+                        <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M4 4a2 2 0 00-2 2v4a2 2 0 002 2V6h10a2 2 0 00-2-2H4zm2 6a2 2 0 012-2h8a2 2 0 012 2v4a2 2 0 01-2 2H8a2 2 0 01-2-2v-4zm6 4a2 2 0 100-4 2 2 0 000 4z" clipRule="evenodd"></path></svg>
+                        <span className="text-[10px]">Dues</span>
                     </button>
                 </div>
             );
 
             const Fab = () => (
-                <button onClick={resetForm} className={`fixed bottom-24 right-4 w-16 h-16 ${theme.primaryGradient} rounded-full flex items-center justify-center text-white text-4xl glow-button active:scale-95 transition-all z-40 border border-white/20 shadow-xl`}>
+                <button onClick={resetForm} className={`fixed bottom-20 right-4 w-12 h-12 ${theme.primaryGradient} rounded-full flex items-center justify-center text-white text-3xl glow-button active:scale-95 transition-all z-40 border border-white/20 shadow-xl pb-1`}>
                     +
                 </button>
             );
 
-            // 🌟 DASHBOARD LIST ITEM (WITH DELETE BUTTON) 🌟
+            // WhatsApp Style Compact List Item
             const BillListItem = ({ bill }) => {
                 const initial = bill.customerName ? bill.customerName.charAt(0).toUpperCase() : 'M';
                 return (
-                    <div className={`${theme.card} p-4 mb-4 rounded-2xl flex flex-col gap-3 transition-transform cursor-pointer relative border-l-4 ${bill.balanceDue > 0 ? 'border-l-pink-500' : 'border-l-emerald-500'}`}>
-                        <div className="flex items-center gap-4" onClick={() => { loadBillData(bill); loadRandomVerse(); navigateTo('receipt'); }}>
-                            <div className={`w-14 h-14 rounded-full ${theme.primaryGradient} flex items-center justify-center text-white font-bold text-2xl shadow-lg shrink-0`}>
+                    <div className={`${theme.card} p-3 mb-2.5 rounded-xl flex flex-col gap-2 transition-transform cursor-pointer relative border-l-[3px] ${bill.balanceDue > 0 ? 'border-l-pink-500' : 'border-l-emerald-500'}`}>
+                        <div className="flex items-center gap-3" onClick={() => { loadBillData(bill); loadRandomVerse(); navigateTo('receipt'); }}>
+                            <div className={`w-10 h-10 rounded-full ${theme.primaryGradient} flex items-center justify-center text-white font-bold text-lg shadow-sm shrink-0`}>
                                 {initial}
                             </div>
                             <div className="flex-1 min-w-0">
-                                <div className="flex justify-between items-baseline mb-1">
-                                    <h3 className={`font-bold ${theme.text} text-xl truncate`}>{bill.customerName || 'Customer'}</h3>
-                                    <span className="text-sm text-indigo-500 font-bold whitespace-nowrap ml-2">
+                                <div className="flex justify-between items-baseline">
+                                    <h3 className={`font-bold ${theme.text} text-sm truncate`}>{bill.customerName || 'Customer'}</h3>
+                                    <span className="text-[10px] text-slate-400 font-medium whitespace-nowrap ml-2">
                                         {bill.date ? new Date(bill.date).toLocaleDateString([], {month:'short', day:'numeric'}) : ''}
                                     </span>
                                 </div>
-                                <div className="flex justify-between items-center">
-                                    <p className={`text-base ${theme.textMuted} truncate pr-2`}>{bill.vehicleModel} {bill.vehicleNo ? `- ${bill.vehicleNo}` : ''}</p>
-                                    <span className={`font-bold ${theme.text} text-lg`}>₹{bill.grandTotal}</span>
+                                <div className="flex justify-between items-center mt-0.5">
+                                    <p className={`text-xs ${theme.textMuted} truncate pr-2`}>{bill.vehicleModel}</p>
+                                    <span className={`font-bold ${theme.text} text-sm`}>₹{bill.grandTotal}</span>
                                 </div>
                             </div>
                         </div>
                         
-                        <div className={`flex justify-between items-center pt-3 mt-1 border-t ${isDarkMode ? 'border-slate-700' : 'border-slate-200'}`}>
+                        <div className={`flex justify-between items-center pt-2 mt-1 border-t ${isDarkMode ? 'border-slate-700/50' : 'border-slate-100'}`}>
                             {bill.balanceDue > 0 ? (
-                                <span className="bg-pink-500/20 text-pink-500 px-3 py-1 rounded-lg text-xs font-bold border border-pink-500/20">Pending: ₹{bill.balanceDue}</span>
+                                <span className="text-pink-500 text-[10px] font-bold">Pending: ₹{bill.balanceDue}</span>
                             ) : (
-                                <span className="bg-emerald-500/20 text-emerald-500 px-3 py-1 rounded-lg text-xs font-bold border border-emerald-500/20">Fully Paid</span>
+                                <span className="text-emerald-500 text-[10px] font-bold">Fully Paid</span>
                             )}
                             
                             <div className="flex gap-2">
-                                <button onClick={(e) => handleDeleteBill(bill, e)} className={`flex items-center text-rose-500 ${isDarkMode ? 'bg-rose-500/10 hover:bg-rose-500/20' : 'bg-rose-100 hover:bg-rose-200'} px-3 py-1.5 rounded-xl text-sm font-bold active:scale-95 transition-transform`}>
+                                <button onClick={(e) => handleDeleteBill(bill, e)} className={`text-slate-400 hover:text-rose-500 px-2 py-1 text-xs active:scale-95 transition-colors`}>
                                     🗑️
                                 </button>
-                                <button onClick={(e) => { e.stopPropagation(); loadBillData(bill); navigateTo('newBill'); }} className={`flex items-center gap-1 text-indigo-500 ${isDarkMode ? 'bg-indigo-500/10 hover:bg-indigo-500/20' : 'bg-indigo-100 hover:bg-indigo-200'} px-4 py-1.5 rounded-xl text-sm font-bold active:scale-95 transition-transform`}>
+                                <button onClick={(e) => { e.stopPropagation(); loadBillData(bill); navigateTo('newBill'); }} className={`text-indigo-500 ${isDarkMode ? 'bg-indigo-500/10' : 'bg-indigo-50'} px-3 py-1 rounded-lg text-[11px] font-bold active:scale-95 transition-transform`}>
                                     ✏️ Edit
                                 </button>
                             </div>
@@ -372,72 +411,81 @@
             // === MAIN RENDER AREA ===
             return (
                 <div className={`${theme.bg} min-h-screen transition-colors duration-300 font-sans`}>
-                    
+                    <GearLoader />
+
+                    {/* PRE-SPLASH */}
                     {currentScreen === 'pre-splash' && (
                         <div className="min-h-screen flex flex-col items-center justify-center relative overflow-hidden bg-[#0f172a]">
                             <div className="text-center z-10 p-6 flex flex-col items-center">
-                                <h1 className="text-4xl font-black tracking-widest uppercase font-serif bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 to-indigo-500 mb-2 drop-shadow-md">Mary</h1>
-                                <h2 className="text-sm tracking-widest uppercase text-slate-400 font-bold mb-10">Workshop System</h2>
-                                <button onClick={startEngineAndApp} className="bg-gradient-to-r from-emerald-400 to-emerald-600 text-slate-900 font-black text-xl px-10 py-5 rounded-full glow-button hover:scale-105 active:scale-95 transition-all shadow-[0_0_40px_rgba(52,211,153,0.5)] border-2 border-emerald-300">
+                                <h1 className="text-3xl font-black tracking-widest uppercase font-serif bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 to-indigo-500 mb-1 drop-shadow-md">Mary</h1>
+                                <h2 className="text-xs tracking-widest uppercase text-slate-400 font-bold mb-10">Workshop System</h2>
+                                <button onClick={startEngineAndApp} className="bg-gradient-to-r from-emerald-400 to-emerald-600 text-slate-900 font-bold text-sm px-8 py-3.5 rounded-full glow-button hover:scale-105 active:scale-95 transition-all shadow-[0_0_30px_rgba(52,211,153,0.4)] border border-emerald-300">
                                     START ENGINE 🏍️
                                 </button>
                             </div>
                         </div>
                     )}
 
+                    {/* CINEMATIC SPLASH */}
                     {currentScreen === 'splash' && (
                         <div className="min-h-screen flex flex-col items-center justify-center relative overflow-hidden bg-[#0f172a]">
                             <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/stardust.png')] opacity-30"></div>
                             
-                            <div className="phase-1 absolute inset-0 flex flex-col items-center justify-center p-8 z-20">
-                                <p className="text-2xl md:text-3xl font-bold text-white leading-relaxed mb-6 text-center drop-shadow-[0_0_15px_rgba(255,255,255,0.6)]">
+                            <div className="phase-1 absolute inset-0 flex flex-col items-center justify-center p-6 z-20">
+                                <p className="text-xl md:text-2xl font-bold text-white leading-relaxed mb-4 text-center drop-shadow-[0_0_10px_rgba(255,255,255,0.5)]">
                                     {currentVerse.tamil}
                                 </p>
-                                <p className="text-base md:text-lg italic font-serif text-cyan-300 text-center drop-shadow-[0_0_8px_rgba(34,211,238,0.8)]">
+                                <p className="text-sm italic font-serif text-cyan-300 text-center drop-shadow-[0_0_8px_rgba(34,211,238,0.8)]">
                                     {currentVerse.text} - {currentVerse.ref}
                                 </p>
                             </div>
 
                             <div className="phase-2-text absolute inset-0 flex flex-col items-center justify-center p-4 z-30 bg-[#0f172a]">
                                 <div className="absolute top-16 text-center w-full">
-                                    <h1 className="text-5xl font-black tracking-widest uppercase font-serif bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 to-indigo-500 drop-shadow-[0_0_15px_rgba(99,102,241,0.5)] mb-2">Mary</h1>
-                                    <div className="h-px w-24 mx-auto bg-cyan-500/50 my-4"></div>
-                                    <h2 className="text-sm tracking-[0.3em] uppercase text-slate-300 font-bold">Two Wheelar Workshop</h2>
+                                    <h1 className="text-4xl font-black tracking-widest uppercase font-serif bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 to-indigo-500 drop-shadow-[0_0_15px_rgba(99,102,241,0.5)] mb-1">Mary</h1>
+                                    <div className="h-px w-16 mx-auto bg-cyan-500/50 my-3"></div>
+                                    <h2 className="text-[10px] tracking-[0.2em] uppercase text-slate-300 font-bold">Two Wheelar Workshop</h2>
                                 </div>
                             </div>
                                 
-                            <img 
-                                src="./bike.png" 
-                                onError={(e) => { e.target.onerror = null; e.target.src="https://pngimg.com/d/motorcycle_PNG5341.png" }}
-                                className="phase-2-bike" 
-                                alt="Superbike" 
-                            />
+                            <img src="./bike.png" onError={(e) => { e.target.onerror = null; e.target.src="https://pngimg.com/d/motorcycle_PNG5341.png" }} className="phase-2-bike" alt="Superbike" />
                             <div className="phase-2-road"></div>
                         </div>
                     )}
 
                     {currentScreen === 'dashboard' && (
-                        <div className="pb-28 max-w-md mx-auto relative">
-                            <div className={`sticky top-0 z-30 ${theme.glass} border-b p-4 pt-2 rounded-b-3xl mb-6`}>
+                        <div className="pb-24 max-w-md mx-auto relative">
+                            <div className={`sticky top-0 z-30 ${theme.glass} border-b p-4 pt-1 rounded-b-2xl mb-4`}>
                                 <HeaderWord />
-                                <div className="flex justify-between items-center mt-2">
+                                <div className="flex justify-between items-center mt-1">
                                     <div>
-                                        <h1 className="text-2xl font-black tracking-wide text-transparent bg-clip-text bg-gradient-to-r from-violet-500 to-indigo-500">Mary Workshop</h1>
-                                        <p className={`text-sm font-bold ${theme.textMuted} mt-1 flex items-center gap-2`}>
-                                            <span className="w-2.5 h-2.5 rounded-full bg-emerald-500 animate-pulse"></span> Online
-                                        </p>
+                                        <h1 className="text-xl font-black tracking-wide text-transparent bg-clip-text bg-gradient-to-r from-violet-500 to-indigo-500">Mary Workshop</h1>
+                                        <StatusIndicator />
                                     </div>
-                                    <button onClick={toggleTheme} className={`w-10 h-10 rounded-full flex items-center justify-center ${theme.card} text-xl shadow-md`}>
+                                    <button onClick={toggleTheme} className={`w-8 h-8 rounded-full flex items-center justify-center ${theme.card} text-sm shadow-sm`}>
                                         {isDarkMode ? '☀️' : '🌙'}
                                     </button>
                                 </div>
                             </div>
+
                             <div className="px-4">
-                                <h2 className={`text-sm font-bold ${theme.textMuted} uppercase tracking-wider mb-4 ml-2`}>Recent Bills</h2>
+                                {/* 🌟 NEW MONTHLY DASHBOARD 🌟 */}
+                                <div className="flex gap-3 mb-5">
+                                    <div className={`${theme.card} flex-1 p-3 rounded-xl border-l-2 border-l-emerald-500`}>
+                                        <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-1">This Month</p>
+                                        <h3 className={`text-lg font-black ${theme.text}`}>₹{monthTotal.toFixed(0)}</h3>
+                                    </div>
+                                    <button onClick={() => navigateTo('pending')} className={`${theme.card} flex-1 p-3 rounded-xl border-l-2 border-l-pink-500 active:scale-95 transition-transform text-left`}>
+                                        <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-1">Total Pending</p>
+                                        <h3 className={`text-lg font-black text-pink-500`}>₹{totalPendingAmount.toFixed(0)}</h3>
+                                    </button>
+                                </div>
+
+                                <h2 className={`text-xs font-bold ${theme.textMuted} uppercase tracking-wider mb-3 ml-1`}>Recent Bills</h2>
                                 {isLoadingBills ? (
-                                    <div className="text-center text-indigo-500 mt-10 animate-pulse font-bold text-lg">Syncing database...</div>
+                                    <div className="text-center text-indigo-500 mt-8 text-sm font-bold">Loading Database...</div>
                                 ) : (
-                                    <div>{allBills.length === 0 ? <p className={`text-center mt-10 ${theme.textMuted} text-lg`}>No records found.</p> : allBills.map((bill, idx) => <BillListItem key={idx} bill={bill} />)}</div>
+                                    <div>{allBills.length === 0 ? <p className={`text-center mt-8 ${theme.textMuted} text-sm`}>No records found.</p> : allBills.slice(0, 30).map((bill, idx) => <BillListItem key={idx} bill={bill} />)}</div>
                                 )}
                             </div>
                             <Fab />
@@ -446,19 +494,19 @@
                     )}
 
                     {currentScreen === 'search' && (
-                        <div className="pb-28 max-w-md mx-auto">
-                            <div className={`sticky top-0 z-30 ${theme.glass} border-b p-4 pt-2 rounded-b-3xl mb-6`}>
+                        <div className="pb-24 max-w-md mx-auto">
+                            <div className={`sticky top-0 z-30 ${theme.glass} border-b p-4 pt-1 rounded-b-2xl mb-4`}>
                                 <HeaderWord />
                                 <input 
                                     type="text" 
                                     placeholder="Search Name, Bike, or Phone..." 
-                                    className={`w-full mt-3 ${theme.input} border rounded-2xl p-4 outline-none glow-input transition-all font-bold text-lg`}
+                                    className={`w-full mt-2 ${theme.input} border rounded-xl p-3 outline-none glow-input transition-all font-medium text-sm`}
                                     value={searchQuery}
                                     onChange={(e) => setSearchQuery(e.target.value)}
                                 />
                             </div>
                             <div className="px-4">
-                                {isLoadingBills ? <div className="text-center text-indigo-500 mt-10 animate-pulse text-lg font-bold">Syncing...</div> : (
+                                {isLoadingBills ? <div className="text-center text-indigo-500 mt-8 text-sm font-bold">Syncing...</div> : (
                                     filteredBills.map((bill, idx) => <BillListItem key={idx} bill={bill} />)
                                 )}
                             </div>
@@ -468,36 +516,36 @@
                     )}
 
                     {currentScreen === 'pending' && (
-                        <div className="pb-28 max-w-md mx-auto relative">
-                            <div className={`sticky top-0 z-30 ${theme.glass} border-b p-4 pt-2 rounded-b-3xl mb-6`}>
+                        <div className="pb-24 max-w-md mx-auto relative">
+                            <div className={`sticky top-0 z-30 ${theme.glass} border-b p-4 pt-1 rounded-b-2xl mb-4`}>
                                 <HeaderWord />
-                                <h1 className={`text-2xl font-black ${theme.text} mb-3 mt-2`}>Pending Dues</h1>
-                                <div className="bg-gradient-to-r from-pink-600 to-rose-600 p-6 rounded-2xl shadow-lg">
-                                    <p className="text-sm font-bold text-pink-200 mb-1 uppercase tracking-wider">Total Outstanding</p>
-                                    <h2 className="text-4xl font-black text-white">₹{totalPendingAmount.toFixed(2)}</h2>
+                                <h1 className={`text-lg font-black ${theme.text} mb-2 mt-1`}>Pending Dues</h1>
+                                <div className="bg-gradient-to-r from-pink-600 to-rose-600 p-4 rounded-xl shadow-md">
+                                    <p className="text-[10px] font-bold text-pink-200 mb-0.5 uppercase tracking-wider">Total Outstanding</p>
+                                    <h2 className="text-2xl font-black text-white">₹{totalPendingAmount.toFixed(2)}</h2>
                                 </div>
                             </div>
                             <div className="px-4">
                                 {pendingBills.length === 0 ? (
-                                    <p className="text-center text-emerald-500 font-bold text-xl mt-10">No pending dues! Excellent.</p>
+                                    <p className="text-center text-emerald-500 font-bold text-sm mt-8">No pending dues! Excellent.</p>
                                 ) : (
                                     pendingBills.map((bill, idx) => (
-                                        <div key={idx} className={`${theme.card} p-5 mb-4 rounded-2xl flex flex-col gap-3 border-l-4 border-l-pink-500`}>
+                                        <div key={idx} className={`${theme.card} p-3 mb-3 rounded-xl flex flex-col gap-2 border-l-[3px] border-l-pink-500`}>
                                             <div className="flex justify-between items-start">
                                                 <div>
-                                                    <h3 className={`font-bold ${theme.text} text-xl`}>{bill.customerName}</h3>
-                                                    <p className={`text-base ${theme.textMuted} font-medium`}>{bill.vehicleModel}</p>
+                                                    <h3 className={`font-bold ${theme.text} text-sm`}>{bill.customerName}</h3>
+                                                    <p className={`text-xs ${theme.textMuted}`}>{bill.vehicleModel}</p>
                                                 </div>
                                                 <div className="text-right">
-                                                    <p className="font-black text-pink-500 text-2xl">₹{bill.balanceDue}</p>
-                                                    <p className={`text-sm ${theme.textMuted} font-bold`}>Total: ₹{bill.grandTotal}</p>
+                                                    <p className="font-black text-pink-500 text-base">₹{bill.balanceDue}</p>
+                                                    <p className={`text-[10px] ${theme.textMuted} font-bold`}>Total: ₹{bill.grandTotal}</p>
                                                 </div>
                                             </div>
-                                            <div className={`flex justify-between gap-3 mt-2 pt-3 border-t ${isDarkMode ? 'border-slate-700' : 'border-slate-200'}`}>
-                                                <button onClick={() => { loadBillData(bill); navigateTo('newBill'); }} className={`w-1/3 text-indigo-500 font-bold text-sm py-3 rounded-xl border border-indigo-500/30 active:scale-95 transition-transform`}>
+                                            <div className={`flex justify-between gap-2 mt-1 pt-2 border-t ${isDarkMode ? 'border-slate-700/50' : 'border-slate-100'}`}>
+                                                <button onClick={() => { loadBillData(bill); navigateTo('newBill'); }} className={`w-1/3 text-indigo-500 font-bold text-xs py-2 rounded-lg border border-indigo-500/20 active:scale-95 transition-transform`}>
                                                     ✏️ Edit
                                                 </button>
-                                                <button onClick={() => openPayModal(bill)} className={`flex-1 ${isDarkMode ? 'bg-slate-900 text-indigo-400' : 'bg-indigo-50 text-indigo-700'} font-bold text-lg py-3 rounded-xl border border-indigo-500/30 active:scale-95 transition-transform`}>
+                                                <button onClick={() => openPayModal(bill)} className={`flex-1 ${isDarkMode ? 'bg-slate-900 text-indigo-400' : 'bg-indigo-50 text-indigo-700'} font-bold text-sm py-2 rounded-lg border border-indigo-500/20 active:scale-95 transition-transform`}>
                                                     Collect
                                                 </button>
                                             </div>
@@ -507,33 +555,33 @@
                             </div>
 
                             {payModalBill && (
-                                <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-                                    <div className={`${theme.glass} border border-indigo-500/30 rounded-3xl p-6 w-full max-w-sm shadow-2xl relative`}>
-                                        <button onClick={closePayModal} className={`absolute top-4 right-4 w-10 h-10 ${theme.input} rounded-full font-bold text-xl`}>X</button>
-                                        <h2 className={`text-2xl font-black ${theme.text} mb-2`}>Receive Payment</h2>
-                                        <p className={`text-base ${theme.textMuted} mb-6 font-bold`}>{payModalBill.customerName} - {payModalBill.vehicleModel}</p>
+                                <div className="fixed inset-0 bg-black/80 backdrop-blur-sm z-[90] flex items-center justify-center p-4">
+                                    <div className={`${theme.glass} border border-indigo-500/30 rounded-2xl p-5 w-full max-w-sm shadow-xl relative`}>
+                                        <button onClick={closePayModal} className={`absolute top-3 right-3 w-8 h-8 ${theme.input} rounded-full font-bold text-sm`}>X</button>
+                                        <h2 className={`text-lg font-black ${theme.text} mb-1`}>Receive Payment</h2>
+                                        <p className={`text-xs ${theme.textMuted} mb-4 font-bold`}>{payModalBill.customerName} - {payModalBill.vehicleModel}</p>
                                         
-                                        <div className={`flex gap-2 mb-6 p-2 ${theme.input} rounded-2xl`}>
-                                            <button onClick={() => {setModalPayMethod('Cash')}} className={`w-1/2 py-3 text-lg rounded-xl font-bold transition-colors ${modalPayMethod === 'Cash' ? theme.primaryGradient + ' text-white shadow-md' : theme.textMuted}`}>Cash</button>
-                                            <button onClick={() => {setModalPayMethod('QR')}} className={`w-1/2 py-3 text-lg rounded-xl font-bold transition-colors ${modalPayMethod === 'QR' ? theme.primaryGradient + ' text-white shadow-md' : theme.textMuted}`}>QR Scan</button>
+                                        <div className={`flex gap-2 mb-4 p-1.5 ${theme.input} rounded-xl`}>
+                                            <button onClick={() => setModalPayMethod('Cash')} className={`w-1/2 py-2 text-sm rounded-lg font-bold transition-colors ${modalPayMethod === 'Cash' ? theme.primaryGradient + ' text-white shadow-sm' : theme.textMuted}`}>Cash</button>
+                                            <button onClick={() => setModalPayMethod('QR')} className={`w-1/2 py-2 text-sm rounded-lg font-bold transition-colors ${modalPayMethod === 'QR' ? theme.primaryGradient + ' text-white shadow-sm' : theme.textMuted}`}>QR Scan</button>
                                         </div>
 
-                                        <div className="mb-6">
-                                            <label className={`text-sm font-bold text-indigo-500 uppercase tracking-wider mb-2 block`}>Amount Receiving (₹)</label>
-                                            <input type="number" className={`w-full ${theme.input} border-2 border-indigo-500 p-5 rounded-2xl text-3xl font-black text-center outline-none glow-input`} value={modalPayAmount} onChange={(e) => setModalPayAmount(e.target.value)} />
+                                        <div className="mb-5">
+                                            <label className={`text-[10px] font-bold text-indigo-500 uppercase tracking-wider mb-1 block`}>Amount Receiving (₹)</label>
+                                            <input type="number" className={`w-full ${theme.input} border border-indigo-500/50 p-3 rounded-xl text-xl font-black text-center outline-none glow-input`} value={modalPayAmount} onChange={(e) => setModalPayAmount(e.target.value)} />
                                         </div>
 
                                         {modalPayMethod === 'QR' && modalPayAmount > 0 && (
-                                            <div className="bg-white p-4 rounded-2xl flex flex-col items-center justify-center mb-6">
-                                                <div className="w-40 h-40 flex items-center justify-center mb-3">
-                                                    <img src={`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(`upi://pay?pa=${upiID}&pn=${encodeURIComponent(shopName)}&am=${modalPayAmount}&cu=INR`)}`} alt="QR" crossOrigin="anonymous" className="w-full h-full" />
+                                            <div className="bg-white p-3 rounded-xl flex flex-col items-center justify-center mb-5">
+                                                <div className="w-32 h-32 flex items-center justify-center mb-2">
+                                                    <img src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(`upi://pay?pa=${upiID}&pn=${encodeURIComponent(shopName)}&am=${modalPayAmount}&cu=INR`)}`} alt="QR" crossOrigin="anonymous" className="w-full h-full" />
                                                 </div>
-                                                <p className="text-slate-800 text-sm font-bold">Ask customer to scan</p>
+                                                <p className="text-slate-800 text-xs font-bold">Ask customer to scan</p>
                                             </div>
                                         )}
 
-                                        <button onClick={handleConfirmPayment} disabled={isSubmitting} className={`w-full text-white text-xl font-bold py-5 rounded-2xl glow-button transition-transform ${isSubmitting ? 'bg-slate-600' : theme.primaryGradient} active:scale-95`}>
-                                            {isSubmitting ? 'Updating...' : 'Confirm Payment'}
+                                        <button onClick={handleConfirmPayment} disabled={isSubmitting} className={`w-full text-white text-sm font-bold py-3.5 rounded-xl glow-button transition-transform ${isSubmitting ? 'bg-slate-600' : theme.primaryGradient} active:scale-95`}>
+                                            Confirm Payment
                                         </button>
                                     </div>
                                 </div>
@@ -544,143 +592,165 @@
 
                     {currentScreen === 'newBill' && (
                         <div className="pb-24 max-w-md mx-auto p-4">
-                            <div className="flex items-center gap-4 mb-6 mt-2">
-                                <button onClick={() => navigateTo('dashboard')} className={`w-12 h-12 ${theme.card} rounded-full flex items-center justify-center font-bold text-indigo-500 text-xl shadow-md active:scale-95`}>{"<"}</button>
-                                <h1 className={`text-2xl font-black ${theme.text}`}>{editingBillId ? 'Edit Bill' : 'New Bill'}</h1>
+                            <div className="flex items-center gap-3 mb-4 mt-1">
+                                <button onClick={() => navigateTo('dashboard')} className={`w-10 h-10 ${theme.card} rounded-full flex items-center justify-center font-bold text-indigo-500 text-lg shadow-sm active:scale-95`}>{"<"}</button>
+                                <h1 className={`text-xl font-black ${theme.text}`}>{editingBillId ? 'Edit Bill' : 'New Bill'}</h1>
                             </div>
                             
-                            <div className={`${theme.card} p-6 rounded-3xl mb-6`}>
-                                <h2 className="text-sm font-bold text-indigo-500 uppercase tracking-wider mb-5">Customer Info</h2>
-                                <div className="flex flex-col gap-4">
-                                    <input type="text" placeholder="Customer Name (Required)" className={`w-full ${theme.input} rounded-xl p-4 text-lg font-bold outline-none glow-input border-l-4 border-l-indigo-500`} value={customerName} onChange={(e) => setCustomerName(e.target.value)} />
-                                    <input type="tel" placeholder="Phone No." className={`w-full ${theme.input} rounded-xl p-4 text-lg font-bold outline-none glow-input`} value={phone} onChange={(e) => setPhone(e.target.value)} />
-                                    <div className="flex gap-3">
-                                        <input type="text" placeholder="Bike Model" className={`w-1/2 ${theme.input} rounded-xl p-4 text-lg font-bold outline-none glow-input border-l-4 border-l-indigo-500`} value={vehicleModel} onChange={(e) => setVehicleModel(e.target.value)} />
-                                        <input type="text" placeholder="Number" className={`w-1/2 ${theme.input} rounded-xl p-4 text-lg font-bold outline-none glow-input`} value={vehicleNo} onChange={(e) => setVehicleNo(e.target.value)} />
+                            <div className={`${theme.card} p-4 rounded-2xl mb-4`}>
+                                <h2 className="text-[11px] font-bold text-indigo-500 uppercase tracking-wider mb-3">Customer Info</h2>
+                                <div className="flex flex-col gap-3">
+                                    <input type="text" placeholder="Customer Name (Required)" className={`w-full ${theme.input} rounded-xl p-3 text-sm font-bold outline-none glow-input border-l-[3px] border-l-indigo-500`} value={customerName} onChange={(e) => setCustomerName(e.target.value)} />
+                                    <input type="tel" placeholder="Phone No." className={`w-full ${theme.input} rounded-xl p-3 text-sm font-bold outline-none glow-input`} value={phone} onChange={(e) => setPhone(e.target.value)} />
+                                    
+                                    {/* 🌟 CUSTOMER HISTORY ALERT 🌟 */}
+                                    {phone.length > 8 && customerHistory.length > 0 && (
+                                        <div className="bg-emerald-500/10 text-emerald-500 text-[10px] p-2 rounded-lg flex justify-between items-center border border-emerald-500/20 -mt-1">
+                                            <span>Returning Customer: <b>{customerHistory.length}</b> past visits!</span>
+                                            <button onClick={() => { setSearchQuery(phone); navigateTo('search'); }} className="underline font-bold">History</button>
+                                        </div>
+                                    )}
+
+                                    <div className="flex gap-2">
+                                        <input type="text" placeholder="Bike Model" className={`w-1/2 ${theme.input} rounded-xl p-3 text-sm font-bold outline-none glow-input border-l-[3px] border-l-indigo-500`} value={vehicleModel} onChange={(e) => setVehicleModel(e.target.value)} />
+                                        <input type="text" placeholder="Number" className={`w-1/2 ${theme.input} rounded-xl p-3 text-sm font-bold outline-none glow-input`} value={vehicleNo} onChange={(e) => setVehicleNo(e.target.value)} />
                                     </div>
                                 </div>
                             </div>
 
-                            <div className={`${theme.card} p-6 rounded-3xl mb-6`}>
-                                <h2 className="text-sm font-bold text-indigo-500 uppercase tracking-wider mb-5">Spares & Services</h2>
-                                <div className="flex gap-2 mb-5">
-                                    <input type="text" placeholder="Item name..." className={`w-2/3 ${theme.input} rounded-xl p-4 text-lg font-bold outline-none glow-input`} value={selectedItem} onChange={(e) => setSelectedItem(e.target.value)} />
-                                    <input type="number" placeholder="₹ Price" className={`w-1/3 ${theme.input} rounded-xl p-4 text-lg font-bold outline-none glow-input`} value={itemPrice} onChange={(e) => setItemPrice(e.target.value)} />
-                                </div>
-                                <button onClick={handleAddItem} className={`w-full ${isDarkMode ? 'bg-slate-900 text-indigo-400' : 'bg-indigo-50 text-indigo-700'} font-black text-lg py-4 rounded-xl border border-indigo-500/30 active:scale-95 transition-transform`}>Add to Bill</button>
+                            <div className={`${theme.card} p-4 rounded-2xl mb-4`}>
+                                <h2 className="text-[11px] font-bold text-indigo-500 uppercase tracking-wider mb-2">Spares & Services</h2>
                                 
-                                <div className="mt-5">
+                                {/* 🌟 QUICK ADD INVENTORY CHIPS 🌟 */}
+                                <div className="flex overflow-x-auto gap-2 pb-2 mb-2 snap-x hide-scroll">
+                                    {QUICK_ITEMS.map((qItem, i) => (
+                                        <button key={i} onClick={(e) => handleAddQuickItem(qItem, e)} className={`shrink-0 ${isDarkMode ? 'bg-slate-900 text-cyan-400 border-cyan-500/30' : 'bg-cyan-50 text-cyan-700 border-cyan-200'} text-[10px] font-bold py-1.5 px-3 rounded-full border active:scale-95 transition-transform`}>
+                                            + {qItem.name}
+                                        </button>
+                                    ))}
+                                </div>
+
+                                <div className="flex gap-2 mb-4">
+                                    <input type="text" placeholder="Item name..." className={`w-2/3 ${theme.input} rounded-xl p-3 text-sm font-bold outline-none glow-input`} value={selectedItem} onChange={(e) => setSelectedItem(e.target.value)} />
+                                    <input type="number" placeholder="₹ Price" className={`w-1/3 ${theme.input} rounded-xl p-3 text-sm font-bold outline-none glow-input`} value={itemPrice} onChange={(e) => setItemPrice(e.target.value)} />
+                                </div>
+                                <button onClick={handleAddItem} className={`w-full ${isDarkMode ? 'bg-slate-900 text-indigo-400' : 'bg-indigo-50 text-indigo-700'} font-bold text-sm py-3 rounded-xl border border-indigo-500/30 active:scale-95 transition-transform`}>Add to Bill</button>
+                                
+                                <div className="mt-3">
                                     {items.map((item, index) => (
-                                        <div key={index} className={`flex justify-between border-b ${isDarkMode ? 'border-slate-700' : 'border-slate-200'} py-4 text-base ${theme.textMuted} font-bold`}>
+                                        <div key={index} className={`flex justify-between border-b ${isDarkMode ? 'border-slate-700/50' : 'border-slate-200'} py-2.5 text-sm ${theme.textMuted} font-bold`}>
                                             <span>{item.name}</span>
-                                            <div className="flex items-center gap-4">
-                                                <span className={`${theme.text} text-lg`}>₹{item.price}</span>
-                                                <button onClick={() => removeItem(index)} className="text-pink-500 text-2xl px-2">×</button>
+                                            <div className="flex items-center gap-3">
+                                                <span className={`${theme.text}`}>₹{item.price}</span>
+                                                <button onClick={() => removeItem(index)} className="text-pink-500 text-lg px-1">×</button>
                                             </div>
                                         </div>
                                     ))}
                                 </div>
                             </div>
 
-                            <div className={`${theme.card} p-6 rounded-3xl mb-6`}>
-                                <h2 className="text-sm font-bold text-indigo-500 uppercase tracking-wider mb-5">Totals & Payment</h2>
-                                <div className={`flex justify-between items-center mb-5 border-b ${isDarkMode ? 'border-slate-700' : 'border-slate-200'} pb-5`}>
-                                    <span className={`${theme.textMuted} font-bold text-lg`}>Labor (Cooli) ₹</span>
-                                    <input type="number" placeholder="0" className={`w-1/2 ${theme.input} rounded-xl p-4 text-xl font-black text-right outline-none glow-input`} value={cooli} onChange={(e) => setCooli(e.target.value)} />
+                            <div className={`${theme.card} p-4 rounded-2xl mb-5`}>
+                                <h2 className="text-[11px] font-bold text-indigo-500 uppercase tracking-wider mb-3">Totals & Payment</h2>
+                                <div className={`flex justify-between items-center mb-4 border-b ${isDarkMode ? 'border-slate-700/50' : 'border-slate-200'} pb-4`}>
+                                    <span className={`${theme.textMuted} font-bold text-sm`}>Labor (Cooli) ₹</span>
+                                    <input type="number" placeholder="0" className={`w-1/2 ${theme.input} rounded-xl p-2.5 text-base font-black text-right outline-none glow-input`} value={cooli} onChange={(e) => setCooli(e.target.value)} />
                                 </div>
                                 
-                                <div className="flex justify-between items-center mb-5">
-                                    <span className={`text-xl font-black ${theme.text}`}>Grand Total</span>
-                                    <span className="text-3xl font-black text-indigo-500">₹{grandTotal}</span>
+                                <div className="flex justify-between items-center mb-4">
+                                    <span className={`text-base font-black ${theme.text}`}>Grand Total</span>
+                                    <span className="text-2xl font-black text-indigo-500">₹{grandTotal}</span>
                                 </div>
                                 
-                                <div className={`flex justify-between items-center ${theme.input} p-4 rounded-2xl`}>
-                                    <span className={`font-bold ${theme.textMuted} text-lg`}>Advance ₹</span>
-                                    <input type="number" placeholder="0" className="w-1/2 bg-transparent text-emerald-500 text-2xl text-right outline-none font-black" value={advancePaid} onChange={(e) => setAdvancePaid(e.target.value)} />
+                                <div className={`flex justify-between items-center ${theme.input} p-3 rounded-xl`}>
+                                    <span className={`font-bold ${theme.textMuted} text-xs`}>Advance ₹</span>
+                                    <input type="number" placeholder="0" className="w-1/2 bg-transparent text-emerald-500 text-lg text-right outline-none font-black" value={advancePaid} onChange={(e) => setAdvancePaid(e.target.value)} />
                                 </div>
                                 {balanceDue > 0 && (
-                                    <div className="flex justify-between items-center mt-4 pt-4 text-pink-500 font-black text-xl border-t border-pink-500/20">
+                                    <div className="flex justify-between items-center mt-3 pt-3 text-pink-500 font-black text-sm border-t border-pink-500/20">
                                         <span>Balance Due</span><span>₹{balanceDue}</span>
                                     </div>
                                 )}
                             </div>
 
-                            <button onClick={handleSubmitBill} disabled={isSubmitting} className={`w-full text-white text-xl font-black py-5 rounded-2xl glow-button transition-transform ${isSubmitting ? 'bg-slate-600' : theme.primaryGradient} active:scale-95 shadow-xl`}>
-                                {isSubmitting ? 'Saving...' : (editingBillId ? 'Update Bill' : 'Generate Bill')}
+                            <button onClick={handleSubmitBill} disabled={isSubmitting} className={`w-full text-white text-base font-bold py-4 rounded-xl glow-button transition-transform ${isSubmitting ? 'bg-slate-600' : theme.primaryGradient} active:scale-95 shadow-md`}>
+                                {editingBillId ? 'Update Bill' : 'Generate Bill'}
                             </button>
                         </div>
                     )}
 
                     {currentScreen === 'receipt' && (
                         <div className="p-4 pb-24 max-w-md mx-auto">
-                            <div className="flex items-center gap-4 mb-6 mt-2">
-                                <button onClick={() => navigateTo('dashboard')} className={`w-12 h-12 ${theme.card} rounded-full flex items-center justify-center font-bold text-indigo-500 text-xl shadow-md active:scale-95`}>{"<"}</button>
-                                <h1 className={`text-2xl font-black ${theme.text}`}>Digital Receipt</h1>
+                            <div className="flex items-center gap-3 mb-4 mt-1">
+                                <button onClick={() => navigateTo('dashboard')} className={`w-10 h-10 ${theme.card} rounded-full flex items-center justify-center font-bold text-indigo-500 text-lg shadow-sm active:scale-95`}>{"<"}</button>
+                                <h1 className={`text-xl font-black ${theme.text}`}>Digital Receipt</h1>
                             </div>
 
                             <div id="receipt-capture" className="bg-white relative text-slate-900 shadow-none border-0 w-full max-w-md mx-auto pb-4">
                                 
-                                <div className="bg-white text-center pt-5 pb-3">
-                                    <span className="font-serif italic font-extrabold text-xl text-yellow-600">தேவனுக்கே மகிமை</span>
+                                <div className="bg-white text-center pt-4 pb-2 relative">
+                                    <span className="font-serif italic font-extrabold text-lg text-yellow-600">தேவனுக்கே மகிமை</span>
                                 </div>
 
-                                <div className="bg-gradient-to-r from-violet-600 to-indigo-700 p-6 text-center text-white rounded-t-3xl">
-                                    <h1 className="text-3xl font-black tracking-wider uppercase mb-1">மேரி</h1>
-                                    <p className="text-lg font-bold tracking-widest uppercase opacity-90 mb-2">டூவீலர் ஒர்க்ஸ்</p>
-                                    <p className="text-sm opacity-90 font-medium">ஆத்துகடை தெரு</p>
-                                    <p className="text-sm opacity-90 font-medium">திருவில்லிபுத்தூர்</p>
-                                    <p className="text-sm font-bold opacity-90 mt-2">தொடர்பு:- 9585652521<br/>63800 90774</p> 
+                                <div className="bg-gradient-to-r from-violet-600 to-indigo-700 p-5 text-center text-white rounded-t-2xl">
+                                    <h1 className="text-2xl font-black tracking-wider uppercase mb-1">மேரி</h1>
+                                    <p className="text-base font-bold tracking-widest uppercase opacity-90 mb-1">டூவீலர் ஒர்க்ஸ்</p>
+                                    <p className="text-xs opacity-90 font-medium">ஆத்துகடை தெரு</p>
+                                    <p className="text-xs opacity-90 font-medium">திருவில்லிபுத்தூர்</p>
+                                    <p className="text-xs font-bold opacity-90 mt-1.5">தொடர்பு:- 9585652521, 63800 90774</p> 
                                     
-                                    <div className="mt-5 p-4 bg-black/20 rounded-2xl border border-white/10">
-                                        <p className="text-base font-bold mb-2 leading-relaxed">{currentVerse.tamil}</p>
-                                        <p className="text-xs italic font-serif opacity-80">{currentVerse.text} - {currentVerse.ref}</p>
+                                    <div className="mt-4 p-3 bg-black/20 rounded-xl border border-white/10">
+                                        <p className="text-sm font-bold mb-1.5 leading-relaxed">{currentVerse.tamil}</p>
+                                        <p className="text-[10px] italic font-serif opacity-80">{currentVerse.text} - {currentVerse.ref}</p>
                                     </div>
                                 </div>
 
-                                <div className="p-6 border-b-2 border-dashed border-slate-200 bg-slate-50 text-base">
-                                    <p className="text-slate-500 mb-2 font-medium">Name: <span className="text-slate-900 font-bold ml-2 text-lg">{customerName || 'Unknown'}</span></p>
-                                    <p className="text-slate-500 mb-2 font-medium">Vehicle: <span className="text-slate-900 font-bold ml-2 text-lg">{vehicleModel || 'Unknown'} {vehicleNo ? `- ${vehicleNo}` : ''}</span></p>
-                                    <p className="text-slate-500 font-medium">Date: <span className="text-slate-900 font-bold ml-2 text-lg">{new Date(billDate).toLocaleDateString()}</span></p>
+                                <div className="p-5 border-b border-dashed border-slate-200 bg-slate-50 text-sm">
+                                    <p className="text-slate-500 mb-1.5 font-medium">Name: <span className="text-slate-900 font-bold ml-1">{customerName || 'Unknown'}</span></p>
+                                    <p className="text-slate-500 mb-1.5 font-medium">Vehicle: <span className="text-slate-900 font-bold ml-1">{vehicleModel || 'Unknown'} {vehicleNo ? `- ${vehicleNo}` : ''}</span></p>
+                                    <p className="text-slate-500 font-medium">Date: <span className="text-slate-900 font-bold ml-1">{new Date(billDate).toLocaleDateString()}</span></p>
                                 </div>
 
-                                <div className="p-6">
+                                <div className="p-5">
                                     {items.map((item, index) => (
-                                        <div key={index} className="flex justify-between text-base text-slate-800 mb-3 font-bold">
-                                            <span>{item.name}</span><span className="text-lg">₹{item.price.toFixed(2)}</span>
+                                        <div key={index} className="flex justify-between text-sm text-slate-800 mb-2 font-bold">
+                                            <span>{item.name}</span><span className="text-base">₹{item.price.toFixed(2)}</span>
                                         </div>
                                     ))}
                                     {cooli && (
-                                        <div className="flex justify-between text-base text-slate-800 mb-3 mt-5 pt-5 border-t-2 border-slate-100 font-bold">
-                                            <span>Cooli (Labor)</span><span className="text-lg">₹{parseFloat(cooli).toFixed(2)}</span>
+                                        <div className="flex justify-between text-sm text-slate-800 mb-2 mt-4 pt-4 border-t border-slate-100 font-bold">
+                                            <span>Cooli (Labor)</span><span className="text-base">₹{parseFloat(cooli).toFixed(2)}</span>
                                         </div>
                                     )}
                                 </div>
 
-                                <div className="bg-slate-900 p-6 text-white rounded-b-3xl">
-                                    <div className="flex justify-between text-xl font-black mb-3"><span>Grand Total</span><span>₹{grandTotal.toFixed(2)}</span></div>
-                                    <div className="flex justify-between text-base font-bold text-slate-400 mb-2"><span>Advance / Paid</span><span className="text-emerald-400">₹{currentAdvance.toFixed(2)}</span></div>
+                                <div className="bg-slate-900 p-5 text-white rounded-b-2xl">
+                                    <div className="flex justify-between text-lg font-black mb-2"><span>Grand Total</span><span>₹{grandTotal.toFixed(2)}</span></div>
+                                    <div className="flex justify-between text-sm font-bold text-slate-400 mb-1"><span>Advance / Paid</span><span className="text-emerald-400">₹{currentAdvance.toFixed(2)}</span></div>
                                     
                                     {balanceDue > 0 && (
-                                        <div className="flex justify-between text-2xl font-black mt-4 pt-4 border-t border-slate-700 text-pink-500">
+                                        <div className="flex justify-between text-xl font-black mt-3 pt-3 border-t border-slate-700 text-pink-500">
                                             <span>Balance Due</span><span>₹{balanceDue.toFixed(2)}</span>
                                         </div>
                                     )}
                                     
                                     {balanceDue > 0 && (
-                                        <div className="bg-white mt-6 p-4 rounded-2xl flex flex-col items-center justify-center text-center">
-                                            <div className="w-36 h-36 bg-white flex items-center justify-center mb-3">
+                                        <div className="bg-white mt-5 p-3 rounded-xl flex flex-col items-center justify-center text-center">
+                                            <div className="w-28 h-28 bg-white flex items-center justify-center mb-2">
                                                 <img src={qrUrl} alt="Scan to Pay" crossOrigin="anonymous" className="w-full h-full object-cover" />
                                             </div>
-                                            <p className="text-slate-800 text-sm font-black">Scan to pay balance: ₹{balanceDue}</p>
+                                            <p className="text-slate-800 text-xs font-black">Scan to pay balance: ₹{balanceDue}</p>
                                         </div>
                                     )}
                                 </div>
+                                <div className="bg-white pt-4 text-center border-0">
+                                    <p className="text-slate-600 font-bold text-sm m-0">நன்றி! மீண்டும் வருக!</p>
+                                </div>
                             </div>
 
-                            <div className="mt-8 flex gap-3">
-                                <button onClick={() => navigateTo('dashboard')} className={`w-1/4 ${theme.card} ${theme.text} font-bold text-sm py-4 rounded-2xl active:scale-95 transition-transform shadow-lg`}>Home</button>
-                                <button onClick={() => { navigateTo('newBill'); }} className={`w-1/4 ${isDarkMode ? 'bg-indigo-500/20 text-indigo-400 border border-indigo-500/30' : 'bg-indigo-100 text-indigo-600 border border-indigo-300'} font-bold text-sm py-4 rounded-2xl active:scale-95 transition-transform shadow-lg`}>✏️ Edit</button>
-                                <button onClick={handleShare} className="flex-1 bg-gradient-to-r from-emerald-400 to-emerald-500 text-slate-900 font-black text-lg py-4 rounded-2xl glow-button active:scale-95 transition-transform shadow-xl">
+                            <div className="mt-6 flex gap-2">
+                                <button onClick={() => navigateTo('dashboard')} className={`w-1/4 ${theme.card} ${theme.text} font-bold text-sm py-3.5 rounded-xl active:scale-95 transition-transform shadow-sm`}>Home</button>
+                                <button onClick={() => navigateTo('newBill')} className={`w-1/4 ${isDarkMode ? 'bg-indigo-500/20 text-indigo-400 border border-indigo-500/30' : 'bg-indigo-100 text-indigo-600 border border-indigo-300'} font-bold text-sm py-3.5 rounded-xl active:scale-95 transition-transform shadow-sm`}>✏️ Edit</button>
+                                <button onClick={handleShare} className="flex-1 bg-gradient-to-r from-emerald-400 to-emerald-500 text-slate-900 font-black text-base py-3.5 rounded-xl glow-button active:scale-95 transition-transform shadow-md">
                                     Share Bill
                                 </button>
                             </div>
