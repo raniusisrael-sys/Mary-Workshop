@@ -21,6 +21,8 @@
         ::-webkit-scrollbar { width: 4px; height: 4px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: #6366f1; border-radius: 10px; }
+        .hide-scroll::-webkit-scrollbar { display: none; }
+        .hide-scroll { -ms-overflow-style: none; scrollbar-width: none; }
         .glow-input:focus { box-shadow: 0 0 10px rgba(99, 102, 241, 0.3); border-color: #6366f1; }
         
         /* Cinematic Splash Animations */
@@ -57,6 +59,20 @@
             "Puncture"
         ];
 
+        // 🌟 SILENT AUDIO MANAGER 🌟
+        const audioClick = new Audio('https://actions.google.com/sounds/v1/cartoon/pop.ogg');
+        const audioSuccess = new Audio('https://actions.google.com/sounds/v1/cartoon/magic_chime.ogg');
+
+        const playSound = (type) => {
+            try {
+                if (type === 'click') {
+                    audioClick.currentTime = 0; audioClick.volume = 0.3; audioClick.play().catch(e => console.log(e));
+                } else if (type === 'success') {
+                    audioSuccess.currentTime = 0; audioSuccess.volume = 1.0; audioSuccess.play().catch(e => console.log(e));
+                }
+            } catch(e) {}
+        };
+
         function App() {
             const upiID = "weslyragland-1@okaxis"; 
             const shopName = "Mary Two Wheelar Workshop";
@@ -90,9 +106,13 @@
             const [isLoadingBills, setIsLoadingBills] = useState(true);
             const [isSyncing, setIsSyncing] = useState(false); 
 
+            // Modal States
             const [payModalBill, setPayModalBill] = useState(null);
             const [modalPayAmount, setModalPayAmount] = useState('');
             const [modalPayMethod, setModalPayMethod] = useState('Cash');
+            
+            // 🌟 APK SHARE FALLBACK STATE 🌟
+            const [generatedBillImage, setGeneratedBillImage] = useState(null);
 
             // WHATSAPP STYLE THEME 
             const theme = {
@@ -148,6 +168,7 @@
             };
 
             const startEngineAndApp = () => {
+                playSound('click');
                 loadRandomVerse();
                 setCurrentScreen('splash');
                 setTimeout(() => {
@@ -159,6 +180,7 @@
             const handleAddItem = (e) => {
                 e.preventDefault();
                 if (selectedItem && itemPrice) {
+                    playSound('click');
                     setItems([...items, { name: selectedItem, price: parseFloat(itemPrice) }]);
                     setSelectedItem(''); setItemPrice('');
                 }
@@ -166,10 +188,14 @@
             
             const handleAddQuickItem = (itemName, e) => {
                 e.preventDefault();
+                playSound('click');
                 setSelectedItem(itemName);
             };
 
-            const removeItem = (index) => setItems(items.filter((_, i) => i !== index));
+            const removeItem = (index) => {
+                playSound('click');
+                setItems(items.filter((_, i) => i !== index));
+            };
 
             const sparesTotal = items.reduce((sum, item) => sum + item.price, 0);
             const grandTotal = sparesTotal + (parseFloat(cooli) || 0);
@@ -184,6 +210,7 @@
                 if(!hasVehicleDetail) return alert("Please enter at least one detail!");
                 if(items.length === 0 && !cooli) return alert("Please add at least one part or labor charge!");
                 
+                playSound('click');
                 setIsSubmitting(true); 
                 const itemsString = items.map(i => `${i.name} (₹${i.price})`).join(', ');
                 
@@ -199,6 +226,7 @@
                     const response = await fetch(GOOGLE_SHEETS_URL, { method: 'POST', body: JSON.stringify(billData) });
                     const result = await response.json();
                     if(result.result === "success") {
+                        playSound('success');
                         try {
                             const freshResponse = await fetch(GOOGLE_SHEETS_URL);
                             const freshJson = await freshResponse.json();
@@ -220,6 +248,7 @@
             };
 
             const resetForm = () => {
+                playSound('click');
                 setEditingBillId(null); setBillDate(new Date().toISOString());
                 setCustomerName(''); setPhone(''); setVehicleModel(''); setVehicleNo(''); 
                 setItems([]); setCooli(''); setAdvancePaid(''); 
@@ -227,6 +256,7 @@
             };
 
             const loadBillData = (bill) => {
+                playSound('click');
                 setEditingBillId(bill.billId); setBillDate(bill.date);
                 setCustomerName(bill.customerName); setPhone(bill.phone);
                 setVehicleModel(bill.vehicleModel); setVehicleNo(bill.vehicleNo);
@@ -238,6 +268,7 @@
                 e.stopPropagation();
                 if(!window.confirm(`Delete bill for ${billToDelete.customerName}?`)) return;
                 
+                playSound('click');
                 setIsSubmitting(true); 
                 const updatedList = allBills.filter(b => b.billId !== billToDelete.billId);
                 setAllBills(updatedList);
@@ -248,11 +279,12 @@
                 setIsSubmitting(false);
             };
 
-            const openPayModal = (bill) => { setPayModalBill(bill); setModalPayAmount(bill.balanceDue); setModalPayMethod('Cash'); };
-            const closePayModal = () => setPayModalBill(null);
+            const openPayModal = (bill) => { playSound('click'); setPayModalBill(bill); setModalPayAmount(bill.balanceDue); setModalPayMethod('Cash'); };
+            const closePayModal = () => { playSound('click'); setPayModalBill(null); };
 
             const handleConfirmPayment = async () => {
                 if(!modalPayAmount || modalPayAmount <= 0) return alert("Enter a valid amount!");
+                playSound('click');
                 setIsSubmitting(true);
 
                 const payVal = parseFloat(modalPayAmount);
@@ -266,34 +298,37 @@
                 try {
                     const response = await fetch(GOOGLE_SHEETS_URL, { method: 'POST', body: JSON.stringify(billData) });
                     const result = await response.json();
-                    if(result.result === "success") { setPayModalBill(null); fetchBills(); }
+                    if(result.result === "success") { playSound('success'); setPayModalBill(null); fetchBills(); }
                 } catch (error) {}
                 setIsSubmitting(false);
             };
 
-            // 🌟 APK-COMPATIBLE WHATSAPP SHARING LOGIC 🌟
+            // 🌟 BULLETPROOF WHATSAPP APK SHARE OVERRIDE 🌟
             const handleShare = async () => {
+                playSound('click');
                 const receiptElement = document.getElementById('receipt-capture');
                 if (!receiptElement) return;
                 try {
-                    // 1. Capture and save the file directly to device gallery/downloads
                     const canvas = await html2canvas(receiptElement, { scale: 2, useCORS: true, allowTaint: true, backgroundColor: "#ffffff" });
-                    const link = document.createElement('a'); 
-                    link.download = customerName ? `Mary_Workshop_${customerName}.png` : `Workshop_Bill.png`; 
-                    link.href = canvas.toDataURL(); 
-                    link.click();
+                    canvas.toBlob(async (blob) => {
+                        const fileName = customerName ? `Mary_Workshop_${customerName}.png` : `Workshop_Bill.png`;
+                        const file = new File([blob], fileName, { type: "image/png" });
+                        const shareMessage = `மேரி டூவீலர் ஒர்க்ஸ் (Mary Two Wheelar Workshop)\n\nநன்றி! மீண்டும் வருக!\n\nஎங்கள் சேவைகளை Google-ல் மதிப்பிடவும் ⭐⭐⭐⭐⭐:\n${googleReviewLink}`;
 
-                    // 2. Format a bulletproof WhatsApp custom text message payload
-                    const shareMessage = `மேரி டூவீலர் ஒர்க்ஸ் (Mary Two Wheelar Workshop)\n\nநன்றி! மீண்டும் வருக!\n\nஎங்கள் சேவைகளை Google-ல் மதிப்பிடவும் ⭐⭐⭐⭐⭐:\n${googleReviewLink}`;
-                    
-                    // 3. Force launch native WhatsApp app from inside the WebView shell using wa.me deep-linking
-                    const targetPhone = phone.trim().replace(/[^0-9]/g, '');
-                    const finalWhatsAppUrl = targetPhone.length >= 10 
-                        ? `https://wa.me/${targetPhone.length === 10 ? '91' + targetPhone : targetPhone}?text=${encodeURIComponent(shareMessage)}`
-                        : `https://wa.me/?text=${encodeURIComponent(shareMessage)}`;
-                    
-                    window.open(finalWhatsAppUrl, '_blank');
-                } catch (error) { alert("Couldn't process your WhatsApp share."); }
+                        try {
+                            // Try modern native sharing first (if the wrapper permits files)
+                            if (navigator.share) {
+                                await navigator.share({ title: 'Mary Workshop Bill', text: shareMessage, files: [file] });
+                            } else {
+                                throw new Error("Share API not supported");
+                            }
+                        } catch (error) {
+                            // CATCHES APK/WEBVIEW LIMITATIONS & PREVENTS DOWNLOAD PROMPTS!
+                            // Instead of downloading, we show the beautiful copy overlay.
+                            setGeneratedBillImage({ url: URL.createObjectURL(blob), text: shareMessage, phone: phone });
+                        }
+                    });
+                } catch (error) { alert("Couldn't process the bill sharing."); }
             };
 
             // Filters & Calculations
@@ -374,7 +409,7 @@
                 const initial = bill.customerName ? bill.customerName.charAt(0).toUpperCase() : 'M';
                 return (
                     <div className={`${theme.card} p-3 mb-2.5 rounded-xl flex flex-col gap-2 transition-transform cursor-pointer relative border-l-[3px] ${bill.balanceDue > 0 ? 'border-l-pink-500' : 'border-l-emerald-500'}`}>
-                        <div className="flex items-center gap-3" onClick={() => { loadBillData(bill); loadRandomVerse(); navigateTo('receipt'); }}>
+                        <div className="flex items-center gap-3" onClick={() => { playSound('click'); loadBillData(bill); loadRandomVerse(); navigateTo('receipt'); }}>
                             <div className={`w-10 h-10 rounded-full ${theme.primaryGradient} flex items-center justify-center text-white font-bold text-lg shadow-sm shrink-0`}>
                                 {initial}
                             </div>
@@ -403,7 +438,7 @@
                                 <button onClick={(e) => handleDeleteBill(bill, e)} className={`text-slate-400 hover:text-rose-500 px-2 py-1 text-xs active:scale-95 transition-colors`}>
                                     🗑️
                                 </button>
-                                <button onClick={(e) => { e.stopPropagation(); loadBillData(bill); navigateTo('newBill'); }} className={`text-indigo-500 ${isDarkMode ? 'bg-indigo-500/10' : 'bg-indigo-50'} px-3 py-1 rounded-lg text-[11px] font-bold active:scale-95 transition-transform`}>
+                                <button onClick={(e) => { e.stopPropagation(); playSound('click'); loadBillData(bill); navigateTo('newBill'); }} className={`text-indigo-500 ${isDarkMode ? 'bg-indigo-500/10' : 'bg-indigo-50'} px-3 py-1 rounded-lg text-[11px] font-bold active:scale-95 transition-transform`}>
                                     ✏️ Edit
                                 </button>
                             </div>
@@ -412,15 +447,47 @@
                 );
             };
 
+            // === MAIN RENDER AREA ===
             return (
                 <div className={`${theme.bg} min-h-screen transition-colors duration-300 font-sans`}>
                     <GearLoader />
+
+                    {/* 🌟 APK/WEBVIEW SHARE FALLBACK MODAL 🌟 */}
+                    {generatedBillImage && (
+                        <div className="fixed inset-0 bg-slate-900/95 backdrop-blur-md z-[100] flex flex-col items-center justify-center p-5">
+                            <button onClick={() => { playSound('click'); setGeneratedBillImage(null); }} className="absolute top-5 right-5 w-10 h-10 bg-slate-800 text-slate-300 rounded-full font-bold text-xl border border-slate-600 shadow-lg flex items-center justify-center">×</button>
+                            
+                            <h2 className="text-2xl font-black text-white mb-2 text-center">Share Bill</h2>
+                            
+                            <div className="bg-indigo-500/20 border border-indigo-500/50 p-4 rounded-xl mb-5 w-full max-w-sm">
+                                <p className="text-[13px] text-indigo-300 text-center font-bold leading-relaxed">
+                                    Native sharing is blocked by your App Wrapper.<br/>
+                                    <span className="text-white">Long-press the bill below</span> and select <span className="text-emerald-400">"Share Image"</span> to send it!
+                                </p>
+                            </div>
+
+                            <div className="w-full max-w-sm max-h-[45vh] overflow-y-auto rounded-2xl shadow-[0_0_30px_rgba(99,102,241,0.2)] mb-6 border border-slate-700 hide-scroll">
+                                <img src={generatedBillImage.url} className="w-full h-auto" alt="Generated Bill" />
+                            </div>
+
+                            <button onClick={() => {
+                                playSound('click');
+                                const targetPhone = generatedBillImage.phone.trim().replace(/[^0-9]/g, '');
+                                const finalWhatsAppUrl = targetPhone.length >= 10 
+                                    ? `https://wa.me/${targetPhone.length === 10 ? '91' + targetPhone : targetPhone}?text=${encodeURIComponent(generatedBillImage.text)}`
+                                    : `https://wa.me/?text=${encodeURIComponent(generatedBillImage.text)}`;
+                                window.open(finalWhatsAppUrl, '_blank');
+                            }} className="w-full max-w-sm text-white text-base font-black py-4 rounded-xl bg-gradient-to-r from-emerald-500 to-emerald-600 active:scale-95 shadow-lg border border-emerald-400 transition-transform">
+                                1. Open WhatsApp Chat
+                            </button>
+                        </div>
+                    )}
 
                     {/* PRE-SPLASH */}
                     {currentScreen === 'pre-splash' && (
                         <div className="min-h-screen flex flex-col items-center justify-center relative overflow-hidden bg-[#0f172a]">
                             <div className="text-center z-10 p-6 flex flex-col items-center">
-                                <h1 className="text-3xl font-black tracking-widest uppercase font-serif bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 to-indigo-500 mb-2 drop-shadow-md">Mary</h1>
+                                <h1 className="text-3xl font-black tracking-widest uppercase font-serif bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 to-indigo-500 mb-1 drop-shadow-md">Mary</h1>
                                 <h2 className="text-xs tracking-widest uppercase text-slate-400 font-bold mb-10">Workshop System</h2>
                                 <button onClick={startEngineAndApp} className="bg-gradient-to-r from-emerald-400 to-emerald-600 text-slate-900 font-bold text-sm px-8 py-3.5 rounded-full glow-button hover:scale-105 active:scale-95 transition-all shadow-[0_0_30px_rgba(52,211,153,0.4)] border border-emerald-300">
                                     START ENGINE 🏍️
@@ -445,8 +512,8 @@
 
                             <div className="phase-2-text absolute inset-0 flex flex-col items-center justify-center p-4 z-30 bg-[#0f172a]">
                                 <div className="absolute top-16 text-center w-full">
-                                    <h1 className="text-4xl font-black tracking-wider uppercase font-serif bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 to-indigo-500 drop-shadow-[0_0_15px_rgba(99,102,241,0.5)] mb-1">Mary</h1>
-                                    <div className="h-px w-16 mx-auto bg-cyan-500/50 my-4"></div>
+                                    <h1 className="text-4xl font-black tracking-widest uppercase font-serif bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 to-indigo-500 drop-shadow-[0_0_15px_rgba(99,102,241,0.5)] mb-1">Mary</h1>
+                                    <div className="h-px w-16 mx-auto bg-cyan-500/50 my-3"></div>
                                     <h2 className="text-[10px] tracking-[0.2em] uppercase text-slate-300 font-bold">Two Wheelar Workshop</h2>
                                 </div>
                             </div>
@@ -544,7 +611,7 @@
                                                 </div>
                                             </div>
                                             <div className={`flex justify-between gap-2 mt-1 pt-2 border-t ${isDarkMode ? 'border-slate-700/50' : 'border-slate-100'}`}>
-                                                <button onClick={() => { loadBillData(bill); navigateTo('newBill'); }} className={`w-1/3 text-indigo-500 font-bold text-xs py-2 rounded-lg border border-indigo-500/20 active:scale-95 transition-transform`}>
+                                                <button onClick={() => { playSound('click'); loadBillData(bill); navigateTo('newBill'); }} className={`w-1/3 text-indigo-500 font-bold text-xs py-2 rounded-lg border border-indigo-500/20 active:scale-95 transition-transform`}>
                                                     ✏️ Edit
                                                 </button>
                                                 <button onClick={() => openPayModal(bill)} className={`flex-1 ${isDarkMode ? 'bg-slate-900 text-indigo-400' : 'bg-indigo-50 text-indigo-700'} font-bold text-sm py-2 rounded-lg border border-indigo-500/20 active:scale-95 transition-transform`}>
@@ -563,9 +630,9 @@
                                         <h2 className={`text-lg font-black ${theme.text} mb-1`}>Receive Payment</h2>
                                         <p className={`text-xs ${theme.textMuted} mb-4 font-bold`}>{payModalBill.customerName} - {payModalBill.vehicleModel}</p>
                                         
-                                        <div className={`flex gap-2 mb-6 p-1.5 ${theme.input} rounded-xl`}>
-                                            <button onClick={() => setModalPayMethod('Cash')} className={`w-1/2 py-2 text-sm rounded-lg font-bold transition-colors ${modalPayMethod === 'Cash' ? theme.primaryGradient + ' text-white shadow-sm' : theme.textMuted}`}>Cash</button>
-                                            <button onClick={() => setModalPayMethod('QR')} className={`w-1/2 py-2 text-sm rounded-lg font-bold transition-colors ${modalPayMethod === 'QR' ? theme.primaryGradient + ' text-white shadow-sm' : theme.textMuted}`}>QR Scan</button>
+                                        <div className={`flex gap-2 mb-4 p-1.5 ${theme.input} rounded-xl`}>
+                                            <button onClick={() => {playSound('click'); setModalPayMethod('Cash')}} className={`w-1/2 py-2 text-sm rounded-lg font-bold transition-colors ${modalPayMethod === 'Cash' ? theme.primaryGradient + ' text-white shadow-sm' : theme.textMuted}`}>Cash</button>
+                                            <button onClick={() => {playSound('click'); setModalPayMethod('QR')}} className={`w-1/2 py-2 text-sm rounded-lg font-bold transition-colors ${modalPayMethod === 'QR' ? theme.primaryGradient + ' text-white shadow-sm' : theme.textMuted}`}>QR Scan</button>
                                         </div>
 
                                         <div className="mb-5">
@@ -663,16 +730,16 @@
                                 
                                 <div className={`flex justify-between items-center ${theme.input} p-3 rounded-xl`}>
                                     <span className={`font-bold ${theme.textMuted} text-xs`}>Advance ₹</span>
-                                    <input type="number" placeholder="0" className="w-1/2 bg-transparent text-emerald-500 text-lg text-right outline-none font-black" value={advancePaid} onChange={(e) => setAdvancePaid} />
+                                    <input type="number" placeholder="0" className="w-1/2 bg-transparent text-emerald-500 text-lg text-right outline-none font-black" value={advancePaid} onChange={(e) => setAdvancePaid(e.target.value)} />
                                 </div>
                                 {balanceDue > 0 && (
-                                    <div className="flex justify-between items-center mt-3 pt-3 text-pink-500 font-black text-sm border-t border-pink-500/20">
+                                    <div className="flex justify-between items-center mt-4 pt-4 text-pink-500 font-black text-xl border-t border-pink-500/20">
                                         <span>Balance Due</span><span>₹{balanceDue}</span>
                                     </div>
                                 )}
                             </div>
 
-                            <button onClick={handleSubmitBill} disabled={isSubmitting} className={`w-full text-white text-base font-bold py-4 rounded-xl glow-button transition-transform ${isSubmitting ? 'bg-slate-600' : theme.primaryGradient} active:scale-95 shadow-xl`}>
+                            <button onClick={handleSubmitBill} disabled={isSubmitting} className={`w-full text-white text-base font-bold py-4 rounded-xl glow-button transition-transform ${isSubmitting ? 'bg-slate-600' : theme.primaryGradient} active:scale-95 shadow-md`}>
                                 {editingBillId ? 'Update Bill' : 'Generate Bill'}
                             </button>
                         </div>
@@ -686,69 +753,70 @@
                             </div>
 
                             <div id="receipt-capture" className="bg-white relative text-slate-900 shadow-none border-0 w-full max-w-md mx-auto pb-4">
-                                <div className="bg-white text-center pt-5 pb-3">
-                                    <span className="font-serif italic font-extrabold text-xl text-yellow-600">தேவனுக்கே மகிமை</span>
+                                
+                                <div className="bg-white text-center pt-4 pb-2 relative">
+                                    <span className="font-serif italic font-extrabold text-lg text-yellow-600">தேவனுக்கே மகிமை</span>
                                 </div>
 
                                 <div className="bg-gradient-to-r from-violet-600 to-indigo-700 p-5 text-center text-white rounded-t-2xl">
-                                    <h1 className="text-3xl font-black tracking-wider uppercase mb-1">மேரி</h1>
-                                    <p className="text-lg font-bold tracking-widest uppercase opacity-90 mb-2">டூவீலர் ஒர்க்ஸ்</p>
-                                    <p className="text-sm opacity-90 font-medium">ஆத்துகடை தெரு</p>
-                                    <p className="text-sm opacity-90 font-medium">திருவில்லிபுத்தூர்</p>
-                                    <p className="text-sm font-bold opacity-90 mt-2">தொடர்பு:- 9585652521, 63800 90774</p> 
+                                    <h1 className="text-2xl font-black tracking-wider uppercase mb-1">மேரி</h1>
+                                    <p className="text-base font-bold tracking-widest uppercase opacity-90 mb-1">டூவீலர் ஒர்க்ஸ்</p>
+                                    <p className="text-xs opacity-90 font-medium">ஆத்துகடை தெரு</p>
+                                    <p className="text-xs opacity-90 font-medium">திருவில்லிபுத்தூர்</p>
+                                    <p className="text-xs font-bold opacity-90 mt-1.5">தொடர்பு:- 9585652521, 63800 90774</p> 
                                     
-                                    <div className="mt-5 p-4 bg-black/20 rounded-2xl border border-white/10">
-                                        <p className="text-base font-bold mb-2 leading-relaxed">{currentVerse.tamil}</p>
-                                        <p className="text-xs italic font-serif opacity-80">{currentVerse.text} - {currentVerse.ref}</p>
+                                    <div className="mt-4 p-3 bg-black/20 rounded-xl border border-white/10">
+                                        <p className="text-sm font-bold mb-1.5 leading-relaxed">{currentVerse.tamil}</p>
+                                        <p className="text-[10px] italic font-serif opacity-80">{currentVerse.text} - {currentVerse.ref}</p>
                                     </div>
                                 </div>
 
-                                <div className="p-6 border-b-2 border-dashed border-slate-200 bg-slate-50 text-base">
-                                    <p className="text-slate-500 mb-2 font-medium">Name: <span className="text-slate-900 font-bold ml-2 text-lg">{customerName || 'Unknown'}</span></p>
-                                    <p className="text-slate-500 mb-2 font-medium">Vehicle: <span className="text-slate-900 font-bold ml-2 text-lg">{vehicleModel || 'Unknown'} {vehicleNo ? `- ${vehicleNo}` : ''}</span></p>
-                                    <p className="text-slate-500 font-medium">Date: <span className="text-slate-900 font-bold ml-2 text-lg">{new Date(billDate).toLocaleDateString()}</span></p>
+                                <div className="p-5 border-b border-dashed border-slate-200 bg-slate-50 text-sm">
+                                    <p className="text-slate-500 mb-1.5 font-medium">Name: <span className="text-slate-900 font-bold ml-1">{customerName || 'Unknown'}</span></p>
+                                    <p className="text-slate-500 mb-1.5 font-medium">Vehicle: <span className="text-slate-900 font-bold ml-1">{vehicleModel || 'Unknown'} {vehicleNo ? `- ${vehicleNo}` : ''}</span></p>
+                                    <p className="text-slate-500 font-medium">Date: <span className="text-slate-900 font-bold ml-1">{new Date(billDate).toLocaleDateString()}</span></p>
                                 </div>
 
-                                <div className="p-6">
+                                <div className="p-5">
                                     {items.map((item, index) => (
-                                        <div key={index} className="flex justify-between text-base text-slate-800 mb-3 font-bold">
-                                            <span>{item.name}</span><span className="text-lg">₹{item.price.toFixed(2)}</span>
+                                        <div key={index} className="flex justify-between text-sm text-slate-800 mb-2 font-bold">
+                                            <span>{item.name}</span><span className="text-base">₹{item.price.toFixed(2)}</span>
                                         </div>
                                     ))}
                                     {cooli && (
-                                        <div className="flex justify-between text-base text-slate-800 mb-3 mt-5 pt-5 border-t-2 border-slate-100 font-bold">
-                                            <span>Cooli (Labor)</span><span className="text-lg">₹{parseFloat(cooli).toFixed(2)}</span>
+                                        <div className="flex justify-between text-sm text-slate-800 mb-2 mt-4 pt-4 border-t border-slate-100 font-bold">
+                                            <span>Cooli (Labor)</span><span className="text-base">₹{parseFloat(cooli).toFixed(2)}</span>
                                         </div>
                                     )}
                                 </div>
 
-                                <div className="bg-slate-900 p-6 text-white rounded-b-3xl">
-                                    <div className="flex justify-between text-xl font-black mb-3"><span>Grand Total</span><span>₹{grandTotal.toFixed(2)}</span></div>
-                                    <div className="flex justify-between text-base font-bold text-slate-400 mb-2"><span>Advance / Paid</span><span className="text-emerald-400">₹{currentAdvance.toFixed(2)}</span></div>
+                                <div className="bg-slate-900 p-5 text-white rounded-b-2xl">
+                                    <div className="flex justify-between text-lg font-black mb-2"><span>Grand Total</span><span>₹{grandTotal.toFixed(2)}</span></div>
+                                    <div className="flex justify-between text-sm font-bold text-slate-400 mb-1"><span>Advance / Paid</span><span className="text-emerald-400">₹{currentAdvance.toFixed(2)}</span></div>
                                     
                                     {balanceDue > 0 && (
-                                        <div className="flex justify-between text-2xl font-black mt-4 pt-4 border-t border-slate-700 text-pink-500">
+                                        <div className="flex justify-between text-xl font-black mt-3 pt-3 border-t border-slate-700 text-pink-500">
                                             <span>Balance Due</span><span>₹{balanceDue.toFixed(2)}</span>
                                         </div>
                                     )}
                                     
                                     {balanceDue > 0 && (
-                                        <div className="bg-white mt-6 p-4 rounded-2xl flex flex-col items-center justify-center text-center">
-                                            <div className="w-36 h-36 bg-white flex items-center justify-center mb-3">
+                                        <div className="bg-white mt-5 p-3 rounded-xl flex flex-col items-center justify-center text-center">
+                                            <div className="w-28 h-28 bg-white flex items-center justify-center mb-2">
                                                 <img src={qrUrl} alt="Scan to Pay" crossOrigin="anonymous" className="w-full h-full object-cover" />
                                             </div>
-                                            <p className="text-slate-800 text-sm font-black">Scan to pay balance: ₹{balanceDue}</p>
+                                            <p className="text-slate-800 text-xs font-black">Scan to pay balance: ₹{balanceDue}</p>
                                         </div>
                                     )}
                                 </div>
-                                <div className="bg-slate-50 p-5 text-center border-0">
-                                    <p className="text-slate-600 font-bold text-base m-0">நன்றி! மீண்டும் வருக!</p>
+                                <div className="bg-white pt-4 text-center border-0">
+                                    <p className="text-slate-600 font-bold text-sm m-0">நன்றி! மீண்டும் வருக!</p>
                                 </div>
                             </div>
 
                             <div className="mt-6 flex gap-2">
                                 <button onClick={() => navigateTo('dashboard')} className={`w-1/4 ${theme.card} ${theme.text} font-bold text-sm py-3.5 rounded-xl active:scale-95 transition-transform shadow-sm`}>Home</button>
-                                <button onClick={() => navigateTo('newBill')} className={`w-1/4 ${isDarkMode ? 'bg-indigo-500/20 text-indigo-400 border border-indigo-500/30' : 'bg-indigo-100 text-indigo-600 border border-indigo-300'} font-bold text-sm py-3.5 rounded-xl active:scale-95 transition-transform shadow-sm`}>✏️ Edit</button>
+                                <button onClick={() => { playSound('click'); navigateTo('newBill'); }} className={`w-1/4 ${isDarkMode ? 'bg-indigo-500/20 text-indigo-400 border border-indigo-500/30' : 'bg-indigo-100 text-indigo-600 border border-indigo-300'} font-bold text-sm py-3.5 rounded-xl active:scale-95 transition-transform shadow-sm`}>✏️ Edit</button>
                                 <button onClick={handleShare} className="flex-1 bg-gradient-to-r from-emerald-400 to-emerald-500 text-slate-900 font-black text-base py-3.5 rounded-xl glow-button active:scale-95 transition-transform shadow-md">
                                     Share Bill
                                 </button>
