@@ -111,8 +111,9 @@
             const [modalPayAmount, setModalPayAmount] = useState('');
             const [modalPayMethod, setModalPayMethod] = useState('Cash');
             
-            // 🌟 APK SHARE FALLBACK STATE 🌟
+            // 🌟 APK SHARE FALLBACK STATES 🌟
             const [generatedBillImage, setGeneratedBillImage] = useState(null);
+            const [isCopied, setIsCopied] = useState(false);
 
             // WHATSAPP STYLE THEME 
             const theme = {
@@ -303,7 +304,6 @@
                 setIsSubmitting(false);
             };
 
-            // 🌟 BULLETPROOF WHATSAPP APK SHARE OVERRIDE 🌟
             const handleShare = async () => {
                 playSound('click');
                 const receiptElement = document.getElementById('receipt-capture');
@@ -316,15 +316,13 @@
                         const shareMessage = `மேரி டூவீலர் ஒர்க்ஸ் (Mary Two Wheelar Workshop)\n\nநன்றி! மீண்டும் வருக!\n\nஎங்கள் சேவைகளை Google-ல் மதிப்பிடவும் ⭐⭐⭐⭐⭐:\n${googleReviewLink}`;
 
                         try {
-                            // Try modern native sharing first (if the wrapper permits files)
                             if (navigator.share) {
                                 await navigator.share({ title: 'Mary Workshop Bill', text: shareMessage, files: [file] });
                             } else {
                                 throw new Error("Share API not supported");
                             }
                         } catch (error) {
-                            // CATCHES APK/WEBVIEW LIMITATIONS & PREVENTS DOWNLOAD PROMPTS!
-                            // Instead of downloading, we show the beautiful copy overlay.
+                            // 🌟 NEW FOOLPROOF MODAL TRIGGERS HERE 🌟
                             setGeneratedBillImage({ url: URL.createObjectURL(blob), text: shareMessage, phone: phone });
                         }
                     });
@@ -452,34 +450,33 @@
                 <div className={`${theme.bg} min-h-screen transition-colors duration-300 font-sans`}>
                     <GearLoader />
 
-                    {/* 🌟 APK/WEBVIEW SHARE FALLBACK MODAL 🌟 */}
+                    {/* 🌟 BULLETPROOF APK SHARE FALLBACK MODAL 🌟 */}
                     {generatedBillImage && (
                         <div className="fixed inset-0 bg-slate-900/95 backdrop-blur-md z-[100] flex flex-col items-center justify-center p-5">
-                            <button onClick={() => { playSound('click'); setGeneratedBillImage(null); }} className="absolute top-5 right-5 w-10 h-10 bg-slate-800 text-slate-300 rounded-full font-bold text-xl border border-slate-600 shadow-lg flex items-center justify-center">×</button>
+                            <button onClick={() => { playSound('click'); setGeneratedBillImage(null); setIsCopied(false); }} className="absolute top-5 right-5 w-10 h-10 bg-slate-800 text-slate-300 rounded-full font-bold text-xl border border-slate-600 shadow-lg flex items-center justify-center">×</button>
                             
-                            <h2 className="text-2xl font-black text-white mb-2 text-center">Share Bill</h2>
+                            <h2 className="text-2xl font-black text-white mb-4 text-center">Share to WhatsApp</h2>
                             
-                            <div className="bg-indigo-500/20 border border-indigo-500/50 p-4 rounded-xl mb-5 w-full max-w-sm">
-                                <p className="text-[13px] text-indigo-300 text-center font-bold leading-relaxed">
-                                    Native sharing is blocked by your App Wrapper.<br/>
-                                    <span className="text-white">Long-press the bill below</span> and select <span className="text-emerald-400">"Share Image"</span> to send it!
-                                </p>
+                            <div className="w-full max-w-sm flex flex-col gap-3 mb-4">
+                                <button onClick={() => {
+                                    playSound('click');
+                                    navigator.clipboard.writeText(generatedBillImage.text);
+                                    setIsCopied(true);
+                                    setTimeout(() => setIsCopied(false), 3000);
+                                }} className={`w-full font-bold py-3.5 rounded-xl active:scale-95 transition-all shadow-md flex items-center justify-center gap-2 ${isCopied ? 'bg-emerald-500 text-white' : 'bg-indigo-600 text-white'}`}>
+                                    {isCopied ? '✅ Message & Link Copied!' : '1. Copy Message & Link 📋'}
+                                </button>
+                                
+                                <div className="bg-slate-800 border border-slate-600 p-3 rounded-xl">
+                                    <p className="text-sm text-slate-300 text-center font-bold">
+                                        2. <span className="text-emerald-400">Long-press</span> the bill below and select <span className="text-emerald-400">"Share Image"</span> 👇
+                                    </p>
+                                </div>
                             </div>
 
-                            <div className="w-full max-w-sm max-h-[45vh] overflow-y-auto rounded-2xl shadow-[0_0_30px_rgba(99,102,241,0.2)] mb-6 border border-slate-700 hide-scroll">
-                                <img src={generatedBillImage.url} className="w-full h-auto" alt="Generated Bill" />
+                            <div className="w-full max-w-sm max-h-[50vh] overflow-y-auto rounded-2xl shadow-[0_0_30px_rgba(52,211,153,0.2)] mb-2 border-2 border-emerald-500 hide-scroll">
+                                <img src={generatedBillImage.url} className="w-full h-auto pointer-events-auto" alt="Generated Bill" />
                             </div>
-
-                            <button onClick={() => {
-                                playSound('click');
-                                const targetPhone = generatedBillImage.phone.trim().replace(/[^0-9]/g, '');
-                                const finalWhatsAppUrl = targetPhone.length >= 10 
-                                    ? `https://wa.me/${targetPhone.length === 10 ? '91' + targetPhone : targetPhone}?text=${encodeURIComponent(generatedBillImage.text)}`
-                                    : `https://wa.me/?text=${encodeURIComponent(generatedBillImage.text)}`;
-                                window.open(finalWhatsAppUrl, '_blank');
-                            }} className="w-full max-w-sm text-white text-base font-black py-4 rounded-xl bg-gradient-to-r from-emerald-500 to-emerald-600 active:scale-95 shadow-lg border border-emerald-400 transition-transform">
-                                1. Open WhatsApp Chat
-                            </button>
                         </div>
                     )}
 
@@ -733,7 +730,7 @@
                                     <input type="number" placeholder="0" className="w-1/2 bg-transparent text-emerald-500 text-lg text-right outline-none font-black" value={advancePaid} onChange={(e) => setAdvancePaid(e.target.value)} />
                                 </div>
                                 {balanceDue > 0 && (
-                                    <div className="flex justify-between items-center mt-4 pt-4 text-pink-500 font-black text-xl border-t border-pink-500/20">
+                                    <div className="flex justify-between items-center mt-3 pt-3 text-pink-500 font-black text-sm border-t border-pink-500/20">
                                         <span>Balance Due</span><span>₹{balanceDue}</span>
                                     </div>
                                 )}
