@@ -4,14 +4,19 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mary Two Wheelar Workshop</title>
+    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <!-- React & Babel -->
     <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <!-- html2canvas -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     
+    <!-- 🌟 CONNECTS YOUR 365 BIBLE VERSES FROM THE VAULT 🌟 -->
     <script src="./bible.js"></script>
 
+    <!-- Custom CSS for Scrollbars, Animations & Gears -->
     <style>
         ::-webkit-scrollbar { width: 4px; height: 4px; }
         ::-webkit-scrollbar-track { background: transparent; }
@@ -43,7 +48,6 @@
         const { useState, useEffect } = React;
         const GOOGLE_SHEETS_URL = "https://script.google.com/macros/s/AKfycbyOzAZoSlxeTHk0A2uEM8Ehsc8aKSgDeSd3eNvi1r7ylDkYHLVH144PdeHH1hkw0i0/exec"; 
 
-        // 🌟 UPDATED QUICK ADD INVENTORY (NAMES ONLY) 🌟
         const QUICK_ITEMS = [
             "Water Wash",
             "Oil Change",
@@ -160,7 +164,6 @@
                 }
             };
             
-            // 🌟 UPDATED: NOW ONLY SETS THE NAME, WAITS FOR PRICE 🌟
             const handleAddQuickItem = (itemName, e) => {
                 e.preventDefault();
                 setSelectedItem(itemName);
@@ -268,23 +271,29 @@
                 setIsSubmitting(false);
             };
 
+            // 🌟 APK-COMPATIBLE WHATSAPP SHARING LOGIC 🌟
             const handleShare = async () => {
                 const receiptElement = document.getElementById('receipt-capture');
                 if (!receiptElement) return;
                 try {
+                    // 1. Capture and save the file directly to device gallery/downloads
                     const canvas = await html2canvas(receiptElement, { scale: 2, useCORS: true, allowTaint: true, backgroundColor: "#ffffff" });
-                    canvas.toBlob(async (blob) => {
-                        const fileName = customerName ? `Mary_Workshop_${customerName}.png` : `Workshop_Bill.png`;
-                        const file = new File([blob], fileName, { type: "image/png" });
-                        const shareMessage = `மேரி டூவீலர் ஒர்க்ஸ் (Mary Two Wheelar Workshop)\n\nநன்றி! மீண்டும் வருக!\n\nஎங்கள் சேவைகளை Google-ல் மதிப்பிடவும் ⭐⭐⭐⭐⭐:\n${googleReviewLink}`;
+                    const link = document.createElement('a'); 
+                    link.download = customerName ? `Mary_Workshop_${customerName}.png` : `Workshop_Bill.png`; 
+                    link.href = canvas.toDataURL(); 
+                    link.click();
 
-                        if (navigator.canShare && navigator.canShare({ files: [file] })) {
-                            await navigator.share({ title: 'Mary Workshop Bill', text: shareMessage, files: [file] });
-                        } else {
-                            const link = document.createElement('a'); link.download = fileName; link.href = canvas.toDataURL(); link.click();
-                        }
-                    });
-                } catch (error) { alert("Couldn't capture the bill."); }
+                    // 2. Format a bulletproof WhatsApp custom text message payload
+                    const shareMessage = `மேரி டூவீலர் ஒர்க்ஸ் (Mary Two Wheelar Workshop)\n\nநன்றி! மீண்டும் வருக!\n\nஎங்கள் சேவைகளை Google-ல் மதிப்பிடவும் ⭐⭐⭐⭐⭐:\n${googleReviewLink}`;
+                    
+                    // 3. Force launch native WhatsApp app from inside the WebView shell using wa.me deep-linking
+                    const targetPhone = phone.trim().replace(/[^0-9]/g, '');
+                    const finalWhatsAppUrl = targetPhone.length >= 10 
+                        ? `https://wa.me/${targetPhone.length === 10 ? '91' + targetPhone : targetPhone}?text=${encodeURIComponent(shareMessage)}`
+                        : `https://wa.me/?text=${encodeURIComponent(shareMessage)}`;
+                    
+                    window.open(finalWhatsAppUrl, '_blank');
+                } catch (error) { alert("Couldn't process your WhatsApp share."); }
             };
 
             // Filters & Calculations
@@ -361,7 +370,6 @@
                 </button>
             );
 
-            // 🌟 UPDATED SIZES FOR BILL ITEM AMOUNTS 🌟
             const BillListItem = ({ bill }) => {
                 const initial = bill.customerName ? bill.customerName.charAt(0).toUpperCase() : 'M';
                 return (
@@ -404,7 +412,6 @@
                 );
             };
 
-            // === MAIN RENDER AREA ===
             return (
                 <div className={`${theme.bg} min-h-screen transition-colors duration-300 font-sans`}>
                     <GearLoader />
@@ -413,7 +420,7 @@
                     {currentScreen === 'pre-splash' && (
                         <div className="min-h-screen flex flex-col items-center justify-center relative overflow-hidden bg-[#0f172a]">
                             <div className="text-center z-10 p-6 flex flex-col items-center">
-                                <h1 className="text-3xl font-black tracking-widest uppercase font-serif bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 to-indigo-500 mb-1 drop-shadow-md">Mary</h1>
+                                <h1 className="text-3xl font-black tracking-widest uppercase font-serif bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 to-indigo-500 mb-2 drop-shadow-md">Mary</h1>
                                 <h2 className="text-xs tracking-widest uppercase text-slate-400 font-bold mb-10">Workshop System</h2>
                                 <button onClick={startEngineAndApp} className="bg-gradient-to-r from-emerald-400 to-emerald-600 text-slate-900 font-bold text-sm px-8 py-3.5 rounded-full glow-button hover:scale-105 active:scale-95 transition-all shadow-[0_0_30px_rgba(52,211,153,0.4)] border border-emerald-300">
                                     START ENGINE 🏍️
@@ -438,8 +445,8 @@
 
                             <div className="phase-2-text absolute inset-0 flex flex-col items-center justify-center p-4 z-30 bg-[#0f172a]">
                                 <div className="absolute top-16 text-center w-full">
-                                    <h1 className="text-4xl font-black tracking-widest uppercase font-serif bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 to-indigo-500 drop-shadow-[0_0_15px_rgba(99,102,241,0.5)] mb-1">Mary</h1>
-                                    <div className="h-px w-16 mx-auto bg-cyan-500/50 my-3"></div>
+                                    <h1 className="text-4xl font-black tracking-wider uppercase font-serif bg-clip-text text-transparent bg-gradient-to-r from-cyan-400 to-indigo-500 drop-shadow-[0_0_15px_rgba(99,102,241,0.5)] mb-1">Mary</h1>
+                                    <div className="h-px w-16 mx-auto bg-cyan-500/50 my-4"></div>
                                     <h2 className="text-[10px] tracking-[0.2em] uppercase text-slate-300 font-bold">Two Wheelar Workshop</h2>
                                 </div>
                             </div>
@@ -465,7 +472,6 @@
                             </div>
 
                             <div className="px-4">
-                                {/* 🌟 BIGGER MONTHLY DASHBOARD 🌟 */}
                                 <div className="flex gap-3 mb-5">
                                     <div className={`${theme.card} flex-1 p-3 rounded-xl border-l-2 border-l-emerald-500`}>
                                         <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-1">This Month</p>
@@ -557,7 +563,7 @@
                                         <h2 className={`text-lg font-black ${theme.text} mb-1`}>Receive Payment</h2>
                                         <p className={`text-xs ${theme.textMuted} mb-4 font-bold`}>{payModalBill.customerName} - {payModalBill.vehicleModel}</p>
                                         
-                                        <div className={`flex gap-2 mb-4 p-1.5 ${theme.input} rounded-xl`}>
+                                        <div className={`flex gap-2 mb-6 p-1.5 ${theme.input} rounded-xl`}>
                                             <button onClick={() => setModalPayMethod('Cash')} className={`w-1/2 py-2 text-sm rounded-lg font-bold transition-colors ${modalPayMethod === 'Cash' ? theme.primaryGradient + ' text-white shadow-sm' : theme.textMuted}`}>Cash</button>
                                             <button onClick={() => setModalPayMethod('QR')} className={`w-1/2 py-2 text-sm rounded-lg font-bold transition-colors ${modalPayMethod === 'QR' ? theme.primaryGradient + ' text-white shadow-sm' : theme.textMuted}`}>QR Scan</button>
                                         </div>
@@ -616,7 +622,6 @@
                             <div className={`${theme.card} p-4 rounded-2xl mb-4`}>
                                 <h2 className="text-[11px] font-bold text-indigo-500 uppercase tracking-wider mb-2">Spares & Services</h2>
                                 
-                                {/* 🌟 LARGER QUICK ADD INVENTORY CHIPS (NAME ONLY) 🌟 */}
                                 <div className="flex overflow-x-auto gap-2 pb-2 mb-2 snap-x hide-scroll">
                                     {QUICK_ITEMS.map((itemName, i) => (
                                         <button key={i} onClick={(e) => handleAddQuickItem(itemName, e)} className={`shrink-0 ${isDarkMode ? 'bg-slate-900 text-cyan-400 border-cyan-500/30' : 'bg-cyan-50 text-cyan-700 border-cyan-200'} text-xs font-bold py-2 px-4 rounded-full border active:scale-95 transition-transform`}>
@@ -646,7 +651,7 @@
 
                             <div className={`${theme.card} p-4 rounded-2xl mb-5`}>
                                 <h2 className="text-[11px] font-bold text-indigo-500 uppercase tracking-wider mb-3">Totals & Payment</h2>
-                                <div className={`flex justify-between items-center mb-4 border-b ${isDarkMode ? 'border-slate-700/50' : 'border-slate-200'} pb-4`}>
+                                <div className={`flex justify-between items-center mb-5 border-b ${isDarkMode ? 'border-slate-700/50' : 'border-slate-200'} pb-5`}>
                                     <span className={`${theme.textMuted} font-bold text-sm`}>Labor (Cooli) ₹</span>
                                     <input type="number" placeholder="0" className={`w-1/2 ${theme.input} rounded-xl p-2.5 text-base font-black text-right outline-none glow-input`} value={cooli} onChange={(e) => setCooli(e.target.value)} />
                                 </div>
@@ -658,7 +663,7 @@
                                 
                                 <div className={`flex justify-between items-center ${theme.input} p-3 rounded-xl`}>
                                     <span className={`font-bold ${theme.textMuted} text-xs`}>Advance ₹</span>
-                                    <input type="number" placeholder="0" className="w-1/2 bg-transparent text-emerald-500 text-lg text-right outline-none font-black" value={advancePaid} onChange={(e) => setAdvancePaid(e.target.value)} />
+                                    <input type="number" placeholder="0" className="w-1/2 bg-transparent text-emerald-500 text-lg text-right outline-none font-black" value={advancePaid} onChange={(e) => setAdvancePaid} />
                                 </div>
                                 {balanceDue > 0 && (
                                     <div className="flex justify-between items-center mt-3 pt-3 text-pink-500 font-black text-sm border-t border-pink-500/20">
@@ -667,7 +672,7 @@
                                 )}
                             </div>
 
-                            <button onClick={handleSubmitBill} disabled={isSubmitting} className={`w-full text-white text-base font-bold py-4 rounded-xl glow-button transition-transform ${isSubmitting ? 'bg-slate-600' : theme.primaryGradient} active:scale-95 shadow-md`}>
+                            <button onClick={handleSubmitBill} disabled={isSubmitting} className={`w-full text-white text-base font-bold py-4 rounded-xl glow-button transition-transform ${isSubmitting ? 'bg-slate-600' : theme.primaryGradient} active:scale-95 shadow-xl`}>
                                 {editingBillId ? 'Update Bill' : 'Generate Bill'}
                             </button>
                         </div>
@@ -677,68 +682,67 @@
                         <div className="p-4 pb-24 max-w-md mx-auto">
                             <div className="flex items-center gap-3 mb-4 mt-1">
                                 <button onClick={() => navigateTo('dashboard')} className={`w-10 h-10 ${theme.card} rounded-full flex items-center justify-center font-bold text-indigo-500 text-lg shadow-sm active:scale-95`}>{"<"}</button>
-                                <h1 className={`text-xl font-black ${theme.text}`}>Digital Receipt</h1>
+                                <h1 className={`text-2xl font-black ${theme.text}`}>Digital Receipt</h1>
                             </div>
 
                             <div id="receipt-capture" className="bg-white relative text-slate-900 shadow-none border-0 w-full max-w-md mx-auto pb-4">
-                                
-                                <div className="bg-white text-center pt-4 pb-2 relative">
-                                    <span className="font-serif italic font-extrabold text-lg text-yellow-600">தேவனுக்கே மகிமை</span>
+                                <div className="bg-white text-center pt-5 pb-3">
+                                    <span className="font-serif italic font-extrabold text-xl text-yellow-600">தேவனுக்கே மகிமை</span>
                                 </div>
 
                                 <div className="bg-gradient-to-r from-violet-600 to-indigo-700 p-5 text-center text-white rounded-t-2xl">
-                                    <h1 className="text-2xl font-black tracking-wider uppercase mb-1">மேரி</h1>
-                                    <p className="text-base font-bold tracking-widest uppercase opacity-90 mb-1">டூவீலர் ஒர்க்ஸ்</p>
-                                    <p className="text-xs opacity-90 font-medium">ஆத்துகடை தெரு</p>
-                                    <p className="text-xs opacity-90 font-medium">திருவில்லிபுத்தூர்</p>
-                                    <p className="text-xs font-bold opacity-90 mt-1.5">தொடர்பு:- 9585652521, 63800 90774</p> 
+                                    <h1 className="text-3xl font-black tracking-wider uppercase mb-1">மேரி</h1>
+                                    <p className="text-lg font-bold tracking-widest uppercase opacity-90 mb-2">டூவீலர் ஒர்க்ஸ்</p>
+                                    <p className="text-sm opacity-90 font-medium">ஆத்துகடை தெரு</p>
+                                    <p className="text-sm opacity-90 font-medium">திருவில்லிபுத்தூர்</p>
+                                    <p className="text-sm font-bold opacity-90 mt-2">தொடர்பு:- 9585652521, 63800 90774</p> 
                                     
-                                    <div className="mt-4 p-3 bg-black/20 rounded-xl border border-white/10">
-                                        <p className="text-sm font-bold mb-1.5 leading-relaxed">{currentVerse.tamil}</p>
-                                        <p className="text-[10px] italic font-serif opacity-80">{currentVerse.text} - {currentVerse.ref}</p>
+                                    <div className="mt-5 p-4 bg-black/20 rounded-2xl border border-white/10">
+                                        <p className="text-base font-bold mb-2 leading-relaxed">{currentVerse.tamil}</p>
+                                        <p className="text-xs italic font-serif opacity-80">{currentVerse.text} - {currentVerse.ref}</p>
                                     </div>
                                 </div>
 
-                                <div className="p-5 border-b border-dashed border-slate-200 bg-slate-50 text-sm">
-                                    <p className="text-slate-500 mb-1.5 font-medium">Name: <span className="text-slate-900 font-bold ml-1">{customerName || 'Unknown'}</span></p>
-                                    <p className="text-slate-500 mb-1.5 font-medium">Vehicle: <span className="text-slate-900 font-bold ml-1">{vehicleModel || 'Unknown'} {vehicleNo ? `- ${vehicleNo}` : ''}</span></p>
-                                    <p className="text-slate-500 font-medium">Date: <span className="text-slate-900 font-bold ml-1">{new Date(billDate).toLocaleDateString()}</span></p>
+                                <div className="p-6 border-b-2 border-dashed border-slate-200 bg-slate-50 text-base">
+                                    <p className="text-slate-500 mb-2 font-medium">Name: <span className="text-slate-900 font-bold ml-2 text-lg">{customerName || 'Unknown'}</span></p>
+                                    <p className="text-slate-500 mb-2 font-medium">Vehicle: <span className="text-slate-900 font-bold ml-2 text-lg">{vehicleModel || 'Unknown'} {vehicleNo ? `- ${vehicleNo}` : ''}</span></p>
+                                    <p className="text-slate-500 font-medium">Date: <span className="text-slate-900 font-bold ml-2 text-lg">{new Date(billDate).toLocaleDateString()}</span></p>
                                 </div>
 
-                                <div className="p-5">
+                                <div className="p-6">
                                     {items.map((item, index) => (
-                                        <div key={index} className="flex justify-between text-sm text-slate-800 mb-2 font-bold">
-                                            <span>{item.name}</span><span className="text-base">₹{item.price.toFixed(2)}</span>
+                                        <div key={index} className="flex justify-between text-base text-slate-800 mb-3 font-bold">
+                                            <span>{item.name}</span><span className="text-lg">₹{item.price.toFixed(2)}</span>
                                         </div>
                                     ))}
                                     {cooli && (
-                                        <div className="flex justify-between text-sm text-slate-800 mb-2 mt-4 pt-4 border-t border-slate-100 font-bold">
-                                            <span>Cooli (Labor)</span><span className="text-base">₹{parseFloat(cooli).toFixed(2)}</span>
+                                        <div className="flex justify-between text-base text-slate-800 mb-3 mt-5 pt-5 border-t-2 border-slate-100 font-bold">
+                                            <span>Cooli (Labor)</span><span className="text-lg">₹{parseFloat(cooli).toFixed(2)}</span>
                                         </div>
                                     )}
                                 </div>
 
-                                <div className="bg-slate-900 p-5 text-white rounded-b-2xl">
-                                    <div className="flex justify-between text-lg font-black mb-2"><span>Grand Total</span><span>₹{grandTotal.toFixed(2)}</span></div>
-                                    <div className="flex justify-between text-sm font-bold text-slate-400 mb-1"><span>Advance / Paid</span><span className="text-emerald-400">₹{currentAdvance.toFixed(2)}</span></div>
+                                <div className="bg-slate-900 p-6 text-white rounded-b-3xl">
+                                    <div className="flex justify-between text-xl font-black mb-3"><span>Grand Total</span><span>₹{grandTotal.toFixed(2)}</span></div>
+                                    <div className="flex justify-between text-base font-bold text-slate-400 mb-2"><span>Advance / Paid</span><span className="text-emerald-400">₹{currentAdvance.toFixed(2)}</span></div>
                                     
                                     {balanceDue > 0 && (
-                                        <div className="flex justify-between text-xl font-black mt-3 pt-3 border-t border-slate-700 text-pink-500">
+                                        <div className="flex justify-between text-2xl font-black mt-4 pt-4 border-t border-slate-700 text-pink-500">
                                             <span>Balance Due</span><span>₹{balanceDue.toFixed(2)}</span>
                                         </div>
                                     )}
                                     
                                     {balanceDue > 0 && (
-                                        <div className="bg-white mt-5 p-3 rounded-xl flex flex-col items-center justify-center text-center">
-                                            <div className="w-28 h-28 bg-white flex items-center justify-center mb-2">
+                                        <div className="bg-white mt-6 p-4 rounded-2xl flex flex-col items-center justify-center text-center">
+                                            <div className="w-36 h-36 bg-white flex items-center justify-center mb-3">
                                                 <img src={qrUrl} alt="Scan to Pay" crossOrigin="anonymous" className="w-full h-full object-cover" />
                                             </div>
-                                            <p className="text-slate-800 text-xs font-black">Scan to pay balance: ₹{balanceDue}</p>
+                                            <p className="text-slate-800 text-sm font-black">Scan to pay balance: ₹{balanceDue}</p>
                                         </div>
                                     )}
                                 </div>
-                                <div className="bg-white pt-4 text-center border-0">
-                                    <p className="text-slate-600 font-bold text-sm m-0">நன்றி! மீண்டும் வருக!</p>
+                                <div className="bg-slate-50 p-5 text-center border-0">
+                                    <p className="text-slate-600 font-bold text-base m-0">நன்றி! மீண்டும் வருக!</p>
                                 </div>
                             </div>
 
