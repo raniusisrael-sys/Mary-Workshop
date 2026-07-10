@@ -43,13 +43,14 @@
         const { useState, useEffect } = React;
         const GOOGLE_SHEETS_URL = "https://script.google.com/macros/s/AKfycbyOzAZoSlxeTHk0A2uEM8Ehsc8aKSgDeSd3eNvi1r7ylDkYHLVH144PdeHH1hkw0i0/exec"; 
 
-        // 🌟 QUICK ADD INVENTORY FOR FAST WORK 🌟
+        // 🌟 UPDATED QUICK ADD INVENTORY (NAMES ONLY) 🌟
         const QUICK_ITEMS = [
-            { name: "Water Wash", price: 150 },
-            { name: "Oil Change", price: 400 },
-            { name: "General Service", price: 500 },
-            { name: "Chain Lube", price: 50 },
-            { name: "Brake Tight", price: 40 }
+            "Water Wash",
+            "Oil Change",
+            "General Service",
+            "Chain Lube",
+            "Brake Tight",
+            "Puncture"
         ];
 
         function App() {
@@ -89,7 +90,7 @@
             const [modalPayAmount, setModalPayAmount] = useState('');
             const [modalPayMethod, setModalPayMethod] = useState('Cash');
 
-            // WHATSAPP STYLE THEME (Tighter styling)
+            // WHATSAPP STYLE THEME 
             const theme = {
                 bg: isDarkMode ? 'bg-[#0f172a]' : 'bg-slate-50',
                 text: isDarkMode ? 'text-slate-100' : 'text-slate-900',
@@ -159,9 +160,10 @@
                 }
             };
             
-            const handleAddQuickItem = (qItem, e) => {
+            // 🌟 UPDATED: NOW ONLY SETS THE NAME, WAITS FOR PRICE 🌟
+            const handleAddQuickItem = (itemName, e) => {
                 e.preventDefault();
-                setItems([...items, { name: qItem.name, price: qItem.price }]);
+                setSelectedItem(itemName);
             };
 
             const removeItem = (index) => setItems(items.filter((_, i) => i !== index));
@@ -179,7 +181,7 @@
                 if(!hasVehicleDetail) return alert("Please enter at least one detail!");
                 if(items.length === 0 && !cooli) return alert("Please add at least one part or labor charge!");
                 
-                setIsSubmitting(true); // Triggers the Gear Loading View!
+                setIsSubmitting(true); 
                 const itemsString = items.map(i => `${i.name} (₹${i.price})`).join(', ');
                 
                 const billData = {
@@ -233,7 +235,7 @@
                 e.stopPropagation();
                 if(!window.confirm(`Delete bill for ${billToDelete.customerName}?`)) return;
                 
-                setIsSubmitting(true); // Show gears while deleting
+                setIsSubmitting(true); 
                 const updatedList = allBills.filter(b => b.billId !== billToDelete.billId);
                 setAllBills(updatedList);
                 localStorage.setItem('mary_bills_cache', JSON.stringify(updatedList));
@@ -295,7 +297,6 @@
             const pendingBills = allBills.filter(bill => parseFloat(bill.balanceDue) > 0);
             const totalPendingAmount = pendingBills.reduce((sum, bill) => sum + parseFloat(bill.balanceDue), 0);
             
-            // 🌟 NEW MONTHLY CALCULATIONS 🌟
             const currentMonth = new Date().getMonth();
             const currentYear = new Date().getFullYear();
             const thisMonthBills = allBills.filter(bill => {
@@ -304,7 +305,6 @@
             });
             const monthTotal = thisMonthBills.reduce((sum, bill) => sum + parseFloat(bill.grandTotal || 0), 0);
 
-            // History Check for New Bill Form
             const customerHistory = allBills.filter(b => b.phone === phone && phone.length > 5 && b.billId !== editingBillId);
 
             // ==========================================
@@ -317,7 +317,6 @@
                 </div>
             );
 
-            // The Loading / Syncing Indicator
             const StatusIndicator = () => (
                 <p className={`text-[10px] font-bold ${theme.textMuted} flex items-center gap-1.5`}>
                     <span className={`w-2 h-2 rounded-full ${isSyncing ? 'bg-yellow-400 animate-pulse' : 'bg-emerald-500'}`}></span> 
@@ -325,15 +324,12 @@
                 </p>
             );
 
-            // 🌟 THE GEAR LOADING MODAL 🌟
             const GearLoader = () => isSubmitting ? (
                 <div className="fixed inset-0 bg-slate-900/80 backdrop-blur-sm z-[100] flex flex-col items-center justify-center">
                     <div className="relative w-20 h-20 flex items-center justify-center mb-4">
-                        {/* Big Gear */}
                         <svg className="absolute w-12 h-12 text-indigo-500 gear-1 ml-5 mb-5" viewBox="0 0 24 24" fill="currentColor">
                             <path d="M19.333 14.667a7.25 7.25 0 000-5.334l2.115-1.12c.365-.192.483-.65.234-1.026l-1.576-2.366c-.24-.36-.71-.462-1.066-.226l-2.074 1.38a7.35 7.35 0 00-4.043-2.316V1.33c0-.41-.334-.746-.745-.746H11.82c-.41 0-.745.335-.745.746v2.333a7.35 7.35 0 00-4.043 2.316L4.96 4.601c-.357-.236-.826-.134-1.066.226L2.318 7.193c-.249.375-.13.834.234 1.025l2.115 1.12a7.25 7.25 0 000 5.334l-2.115 1.12c-.364.192-.483.65-.234 1.026l1.576 2.366c.24.36.71.462 1.066.226l2.074-1.38a7.35 7.35 0 004.043 2.316v2.334c0 .41.334.745.745.745h1.358c.41 0 .745-.335.745-.745v-2.334a7.35 7.35 0 004.043-2.316l2.074 1.38c.356.236.826.134 1.066-.226l1.576-2.366c.249-.375.13-.834-.234-1.025l-2.115-1.12zM12 15.5a3.5 3.5 0 110-7 3.5 3.5 0 010 7z" />
                         </svg>
-                        {/* Small Gear Interlocking */}
                         <svg className="absolute w-8 h-8 text-cyan-400 gear-2 mr-6 mt-6" viewBox="0 0 24 24" fill="currentColor">
                             <path d="M19.333 14.667a7.25 7.25 0 000-5.334l2.115-1.12c.365-.192.483-.65.234-1.026l-1.576-2.366c-.24-.36-.71-.462-1.066-.226l-2.074 1.38a7.35 7.35 0 00-4.043-2.316V1.33c0-.41-.334-.746-.745-.746H11.82c-.41 0-.745.335-.745.746v2.333a7.35 7.35 0 00-4.043 2.316L4.96 4.601c-.357-.236-.826-.134-1.066.226L2.318 7.193c-.249.375-.13.834.234 1.025l2.115 1.12a7.25 7.25 0 000 5.334l-2.115 1.12c-.364.192-.483.65-.234 1.026l1.576 2.366c.24.36.71.462 1.066.226l2.074-1.38a7.35 7.35 0 004.043 2.316v2.334c0 .41.334.745.745.745h1.358c.41 0 .745-.335.745-.745v-2.334a7.35 7.35 0 004.043-2.316l2.074 1.38c.356.236.826.134 1.066-.226l1.576-2.366c.249-.375.13-.834-.234-1.025l-2.115-1.12zM12 15.5a3.5 3.5 0 110-7 3.5 3.5 0 010 7z" />
                         </svg>
@@ -360,12 +356,12 @@
             );
 
             const Fab = () => (
-                <button onClick={resetForm} className={`fixed bottom-20 right-4 w-12 h-12 ${theme.primaryGradient} rounded-full flex items-center justify-center text-white text-3xl glow-button active:scale-95 transition-all z-40 border border-white/20 shadow-xl pb-1`}>
+                <button onClick={resetForm} className={`fixed bottom-20 right-4 w-14 h-14 ${theme.primaryGradient} rounded-full flex items-center justify-center text-white text-3xl glow-button active:scale-95 transition-all z-40 border border-white/20 shadow-xl pb-1`}>
                     +
                 </button>
             );
 
-            // WhatsApp Style Compact List Item
+            // 🌟 UPDATED SIZES FOR BILL ITEM AMOUNTS 🌟
             const BillListItem = ({ bill }) => {
                 const initial = bill.customerName ? bill.customerName.charAt(0).toUpperCase() : 'M';
                 return (
@@ -383,16 +379,16 @@
                                 </div>
                                 <div className="flex justify-between items-center mt-0.5">
                                     <p className={`text-xs ${theme.textMuted} truncate pr-2`}>{bill.vehicleModel}</p>
-                                    <span className={`font-bold ${theme.text} text-sm`}>₹{bill.grandTotal}</span>
+                                    <span className={`font-black ${theme.text} text-base`}>₹{bill.grandTotal}</span>
                                 </div>
                             </div>
                         </div>
                         
                         <div className={`flex justify-between items-center pt-2 mt-1 border-t ${isDarkMode ? 'border-slate-700/50' : 'border-slate-100'}`}>
                             {bill.balanceDue > 0 ? (
-                                <span className="text-pink-500 text-[10px] font-bold">Pending: ₹{bill.balanceDue}</span>
+                                <span className="text-pink-500 text-xs font-black">Pending: ₹{bill.balanceDue}</span>
                             ) : (
-                                <span className="text-emerald-500 text-[10px] font-bold">Fully Paid</span>
+                                <span className="text-emerald-500 text-xs font-black">Fully Paid</span>
                             )}
                             
                             <div className="flex gap-2">
@@ -469,15 +465,15 @@
                             </div>
 
                             <div className="px-4">
-                                {/* 🌟 NEW MONTHLY DASHBOARD 🌟 */}
+                                {/* 🌟 BIGGER MONTHLY DASHBOARD 🌟 */}
                                 <div className="flex gap-3 mb-5">
                                     <div className={`${theme.card} flex-1 p-3 rounded-xl border-l-2 border-l-emerald-500`}>
                                         <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-1">This Month</p>
-                                        <h3 className={`text-lg font-black ${theme.text}`}>₹{monthTotal.toFixed(0)}</h3>
+                                        <h3 className={`text-2xl font-black ${theme.text}`}>₹{monthTotal.toFixed(0)}</h3>
                                     </div>
                                     <button onClick={() => navigateTo('pending')} className={`${theme.card} flex-1 p-3 rounded-xl border-l-2 border-l-pink-500 active:scale-95 transition-transform text-left`}>
                                         <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider mb-1">Total Pending</p>
-                                        <h3 className={`text-lg font-black text-pink-500`}>₹{totalPendingAmount.toFixed(0)}</h3>
+                                        <h3 className={`text-2xl font-black text-pink-500`}>₹{totalPendingAmount.toFixed(0)}</h3>
                                     </button>
                                 </div>
 
@@ -520,9 +516,9 @@
                             <div className={`sticky top-0 z-30 ${theme.glass} border-b p-4 pt-1 rounded-b-2xl mb-4`}>
                                 <HeaderWord />
                                 <h1 className={`text-lg font-black ${theme.text} mb-2 mt-1`}>Pending Dues</h1>
-                                <div className="bg-gradient-to-r from-pink-600 to-rose-600 p-4 rounded-xl shadow-md">
-                                    <p className="text-[10px] font-bold text-pink-200 mb-0.5 uppercase tracking-wider">Total Outstanding</p>
-                                    <h2 className="text-2xl font-black text-white">₹{totalPendingAmount.toFixed(2)}</h2>
+                                <div className="bg-gradient-to-r from-pink-600 to-rose-600 p-5 rounded-xl shadow-md">
+                                    <p className="text-[10px] font-bold text-pink-200 mb-1.5 uppercase tracking-wider">Total Outstanding</p>
+                                    <h2 className="text-3xl font-black text-white">₹{totalPendingAmount.toFixed(2)}</h2>
                                 </div>
                             </div>
                             <div className="px-4">
@@ -537,8 +533,8 @@
                                                     <p className={`text-xs ${theme.textMuted}`}>{bill.vehicleModel}</p>
                                                 </div>
                                                 <div className="text-right">
-                                                    <p className="font-black text-pink-500 text-base">₹{bill.balanceDue}</p>
-                                                    <p className={`text-[10px] ${theme.textMuted} font-bold`}>Total: ₹{bill.grandTotal}</p>
+                                                    <p className="font-black text-pink-500 text-xl">₹{bill.balanceDue}</p>
+                                                    <p className={`text-xs ${theme.textMuted} font-bold mt-0.5`}>Total: ₹{bill.grandTotal}</p>
                                                 </div>
                                             </div>
                                             <div className={`flex justify-between gap-2 mt-1 pt-2 border-t ${isDarkMode ? 'border-slate-700/50' : 'border-slate-100'}`}>
@@ -603,7 +599,6 @@
                                     <input type="text" placeholder="Customer Name (Required)" className={`w-full ${theme.input} rounded-xl p-3 text-sm font-bold outline-none glow-input border-l-[3px] border-l-indigo-500`} value={customerName} onChange={(e) => setCustomerName(e.target.value)} />
                                     <input type="tel" placeholder="Phone No." className={`w-full ${theme.input} rounded-xl p-3 text-sm font-bold outline-none glow-input`} value={phone} onChange={(e) => setPhone(e.target.value)} />
                                     
-                                    {/* 🌟 CUSTOMER HISTORY ALERT 🌟 */}
                                     {phone.length > 8 && customerHistory.length > 0 && (
                                         <div className="bg-emerald-500/10 text-emerald-500 text-[10px] p-2 rounded-lg flex justify-between items-center border border-emerald-500/20 -mt-1">
                                             <span>Returning Customer: <b>{customerHistory.length}</b> past visits!</span>
@@ -621,11 +616,11 @@
                             <div className={`${theme.card} p-4 rounded-2xl mb-4`}>
                                 <h2 className="text-[11px] font-bold text-indigo-500 uppercase tracking-wider mb-2">Spares & Services</h2>
                                 
-                                {/* 🌟 QUICK ADD INVENTORY CHIPS 🌟 */}
+                                {/* 🌟 LARGER QUICK ADD INVENTORY CHIPS (NAME ONLY) 🌟 */}
                                 <div className="flex overflow-x-auto gap-2 pb-2 mb-2 snap-x hide-scroll">
-                                    {QUICK_ITEMS.map((qItem, i) => (
-                                        <button key={i} onClick={(e) => handleAddQuickItem(qItem, e)} className={`shrink-0 ${isDarkMode ? 'bg-slate-900 text-cyan-400 border-cyan-500/30' : 'bg-cyan-50 text-cyan-700 border-cyan-200'} text-[10px] font-bold py-1.5 px-3 rounded-full border active:scale-95 transition-transform`}>
-                                            + {qItem.name}
+                                    {QUICK_ITEMS.map((itemName, i) => (
+                                        <button key={i} onClick={(e) => handleAddQuickItem(itemName, e)} className={`shrink-0 ${isDarkMode ? 'bg-slate-900 text-cyan-400 border-cyan-500/30' : 'bg-cyan-50 text-cyan-700 border-cyan-200'} text-xs font-bold py-2 px-4 rounded-full border active:scale-95 transition-transform`}>
+                                            + {itemName}
                                         </button>
                                     ))}
                                 </div>
